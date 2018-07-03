@@ -23,13 +23,20 @@ text_run = """\
 Choose desired dataset and generate the most important plot. """
 
 text_baseline = """\
-Calculate baseline accuracy using scikit-learn DummyClassifier. """
+Calculate baseline accuracy for classification problems using scikit-learn DummyClassifier. """
 
-
+text_regBaseline = """\
+Calculate baseline accuracy for regression problems using scikit-learn DummyRegressor. """
 
 text_plot_baseline = """\
-Generates a plot of the baseline accuracy of the various baseline strategies using scikit-learn DummyClassifier.
+Generates a plot of the classification baseline accuracy of the various baseline strategies using scikit-learn DummyClassifier.
 """
+
+text_plot_regBaseline = """\
+Generates a plot of the regression baseline accuracy of the various baseline strategies using scikit-learn DummyRegressor.
+"""
+
+text_problemType = """\ Undetermined """
 
 
 
@@ -56,6 +63,52 @@ The similarity between datasets were computed based on the distance function and
     $$ dist(d_i, d_j) = \sum_x{\\frac{|v_{x, d_i}-v_{x, d_j}|}{max_{k \\neq i}(v_x, d_k)-min_{k \\neq i}(v_x, d_k)}}$$
 
 where $d_i$ and $d_j$ are datasets, and $v_{x, d_i}$ is the value of meta-attribute $x$ for dataset $d_i$. The distance is divided by the range to normalize the values, so that all meta-attributes have the same range of values. """
+
+def text_baseline_plot(ds):
+    return """\
+Plot of the classification baseline acuracy of the various baseline strategies using scikit-learn DummyClassifier.
+
+The target feature is: **""" + ds.default_target_attribute + """**
+
+The following baseline strategies are used: stratified, most_frequent, prior, uniform.
+
+The strategies work as follow according to the sciki-learn API:
+
+- **stratified**: Generates predictions by respecting the training set’s class distribution.
+
+- **most_frequent**: Always predicts the most frequent label in the training set. Also known as ZeroR.
+
+- **prior**: Always predicts the class that maximizes the class prior. 
+
+- **uniform**: Generates predictions uniformly at random.
+
+The horizontal red dotted line denotes the baseline value for this dataset which is equal to the best performing baseline strategy.
+
+[More information.](http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html)
+"""
+
+def text_regBaseline_plot(ds):
+    return """\
+Plot of the regression baseline acuracy of the various baseline strategies using scikit-learn DummyRegressor.
+
+The target feature is: **""" + ds.default_target_attribute + """**
+
+The $R^2$ statistic is calculated as a baseline.
+
+The following baseline strategies are used: mean, median.
+
+The strategies work as follow according to the sciki-learn API:
+
+- **mean**: Always predicts the mean of the training set.
+
+- **median**: Always predicts the median of the training set.
+
+[More information.](http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyRegressor.html)
+"""
+
+#---------------------------------------------------------------------------------------------------------------------------
+
+
 
 code_library = """\
 %matplotlib inline
@@ -110,15 +163,20 @@ def plot_regBaseline(scores, y):
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
     from collections import namedtuple
+    
+    fig, ax = plt.subplots()
 
     strats = scores
     x = np.arange(1, len(y) + 1)
     plt.plot(x, y, "o")
     plt.axhline(y=np.mean(y), color='r', linestyle='--', label='mean '+ r"$R^2$" + ' = ' + str(round(scores['mean'],4)))
     plt.axhline(y=np.median(y), color='b', linestyle='--', label='median '+ r"$R^2$" + ' = ' + str(round(scores['median'],4)))
+    
+    ax.set_xlabel('Data point index')
+    ax.set_ylabel(data.default_target_attribute)
 
     plt.legend()
-    plt.show() """
+    plt.show()  """
 
 code_plot_baseline = """\
 def plot_baseline(scores):
@@ -263,10 +321,11 @@ dataset_name, features, importances, indices = build_forest(data)
 plot_feature_importances(features, importances, indices)"""
 
 code_baseline_plot = """\
-plot_baseline(baseline(data))
+plot_baseline(baseline(data)) """
+
+code_regBaseline_plot = """\
 scores, y = regBaseline(data)
-plot_regBaseline(scores, y)
-"""
+plot_regBaseline(scores, y) """
 
 code_landmarkers_plot = """\
 sns.set(style="whitegrid", font_scale=0.75)
@@ -294,28 +353,7 @@ f, ax = plt.subplots(figsize=(10, 6))
 sns.heatmap(corr, mask=mask, cmap = "BuPu_r", vmax= 1,
             square=True, linewidths=.5, cbar_kws={"shrink": .5})"""
 
-def text_baseline_plot(ds):
-    return """\
-Plot of the baseline acuracy of the various baseline strategies using scikit-learn DummyClassifier.
 
-The target feature is: **""" + ds.default_target_attribute + """**
-
-The following baseline strategies are used: stratified, most_frequent, prior, uniform.
-
-The strategies work as follow according to the sciki-learn API:
-
-- **stratified**: Generates predictions by respecting the training set’s class distribution.
-
-- **most_frequent**: Always predicts the most frequent label in the training set. Also known as ZeroR.
-
-- **prior**: Always predicts the class that maximizes the class prior. 
-
-- **uniform**: Generates predictions uniformly at random.
-
-The horizontal red dotted line denotes the baseline value for this dataset which is equal to the best performing baseline strategy.
-
-[More information.](http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html)
-"""
 
 
 def main():
@@ -338,20 +376,60 @@ def create_block(text, code):
         nb['cells'].append(nbf.v4.new_code_cell(code))
 
 
+
+def isRegressionProblem(data):
+    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True)
+    total = 0
+    global text_problemType
+    uniqueElementsDict = {}
+    answer = -1
+    for item in y:
+        total += 1
+        uniqueElementsDict[item] = ""
+    
+    perUnique = len(uniqueElementsDict) / total
+    
+    if perUnique > 0.05:
+        text_problemType = """\
+The percentage of unique values for the default target attribute in this data set is """ + str(round(perUnique,4)) + """.
+Because this is higher than 5% of the dataset we assume that this is a **regression** problem. """
+        answer = 1
+    else:
+        text_problemType = """\
+The percentage of unique values for the default target attribute in this data set is """ + str(round(perUnique,4)) + """.
+Because this is lower or equal than 5% of the dataset we assume that this is a **classification** problem. """
+        answer = 0
+
+    return answer
+
+        
+
+
 def generate_jnb(dataset):
+    nb['cells'] = []
     fname = str(dataset)+'.ipynb'
     ds = oml.datasets.get_dataset(dataset)
+    isRegression = isRegressionProblem(ds)
     text_title = """\
     # Automatic Jupyter Notebook for OpenML dataset %s: %s""" % (dataset,ds.name)
     create_block(text_title, code_library)
-    create_block(text_baseline, code_baseline)
-    create_block("TEMP", code_regBaseline)
-    create_block(text_plot_baseline, code_plot_baseline)
-    create_block("TEMP", code_plot_regBaseline)
+    nb['cells'].append(nbf.v4.new_markdown_cell(text_problemType))
+    if not isRegression:
+        create_block(text_baseline, code_baseline)
+    if isRegression:
+        create_block(text_regBaseline, code_regBaseline)
+    if not isRegression:
+        create_block(text_plot_baseline, code_plot_baseline)
+    if isRegression:
+        create_block(text_plot_regBaseline, code_plot_regBaseline)
     create_block(text_model, code_forest)
     create_block(text_plot, code_feature_plot)
     create_block(text_run, ["dataset = " + str(dataset), code_run])
-    create_block(text_baseline_plot(ds), code_baseline_plot)
+    if not isRegression:
+        create_block(text_baseline_plot(ds), code_baseline_plot)
+    if isRegression:
+        create_block(text_regBaseline_plot(ds), code_regBaseline_plot)    
+    
     #create_block(text_landmarkers,code_get_landmarkers)
     #create_block(text_distances,[code_get_distances,code_compute_similar_datasets,code_get_datasets_name,code_landmarkers_plot,code_similarity_plot])
     
@@ -377,6 +455,7 @@ def generate_jnb(dataset):
         nbf.write(nb, f)
 
     os.system("jupyter nbconvert --execute --inplace %s"%(fname))
+    
 
 if __name__ == "__main__":
     main()
