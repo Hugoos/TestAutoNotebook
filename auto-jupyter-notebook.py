@@ -9,6 +9,7 @@ warnings.simplefilter(action="ignore", category=RuntimeWarning)
 
 nb = nbf.v4.new_notebook()
 
+
 text_title = """\
 # Automatic Jupyter Notebook for OpenML dataset"""
 
@@ -20,6 +21,17 @@ Plot Top-20 important features for the dataset. """
 
 text_run = """\
 Choose desired dataset and generate the most important plot. """
+
+text_baseline = """\
+Calculate baseline accuracy using scikit-learn DummyClassifier. """
+
+
+
+text_plot_baseline = """\
+Generates a plot of the baseline accuracy of the various baseline strategies using scikit-learn DummyClassifier.
+"""
+
+
 
 text_landmarkers = """\
 The following Landmarking meta-features were calculated and stored in MongoDB: (Matthias Reif et al. 2012, Abdelmessih et al. 2010)
@@ -52,6 +64,8 @@ import matplotlib.pyplot as plt
 import openml as oml
 import numpy as np
 import pandas as pd
+from sklearn import dummy
+from sklearn.model_selection import train_test_split
 from matplotlib import cm
 from matplotlib.ticker import FormatStrFormatter
 
@@ -66,9 +80,83 @@ from sklearn.ensemble import RandomForestClassifier
 
 from pymongo import MongoClient"""
 
+code_baseline = """\
+def baseline(data):
+    strategies = ['stratified','most_frequent','prior','uniform']
+    baseDict = {}
+    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    for strat in strategies:
+        clf = dummy.DummyClassifier(strategy=strat,random_state=0)
+        clf.fit(X_train, y_train)
+        baseDict[strat] = clf.score(X_test, y_test)
+    return baseDict  """
+
+code_regBaseline = """\
+def regBaseline(data):
+    strategies = ['mean', 'median']
+    baseDict = {}
+    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    for strat in strategies:
+        clf = dummy.DummyRegressor(strategy=strat)
+        clf.fit(X_train, y_train)
+        baseDict[strat] = clf.score(X_test, y_test)
+    return baseDict, y """
+
+code_plot_regBaseline = """\
+def plot_regBaseline(scores, y):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    from collections import namedtuple
+
+    strats = scores
+    x = np.arange(1, len(y) + 1)
+    plt.plot(x, y, "o")
+    plt.axhline(y=np.mean(y), color='r', linestyle='--', label='mean '+ r"$R^2$" + ' = ' + str(round(scores['mean'],4)))
+    plt.axhline(y=np.median(y), color='b', linestyle='--', label='median '+ r"$R^2$" + ' = ' + str(round(scores['median'],4)))
+
+    plt.legend()
+    plt.show() """
+
+code_plot_baseline = """\
+def plot_baseline(scores):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    from collections import namedtuple
+
+    strats = scores
+    maxBaseline = strats[max(strats, key=strats.get)]
+    
+    n_groups = len(strats)
+
+    fig, ax = plt.subplots()
+
+    index = np.arange(n_groups)
+    bar_width = 0.1
+
+    opacity = 0.4
+    error_config = {'ecolor': '0.3'}
+
+    plt.bar(range(len(strats)), strats.values(), align='center')
+    plt.xticks(range(len(strats)), list(strats.keys()))
+    plt.yticks(np.arange(0, 1.1, step=0.2))
+    plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
+
+    ax.set_ylim(ymin=0)
+    ax.set_ylim(ymax=1)
+    ax.set_xlabel('Baseline Strategy')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Baseline Performance Predicting Feature: ' + data.default_target_attribute)
+    plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
+    plt.gca().get_yticklabels()[6].set_color('red')
+    fig.tight_layout()
+    plt.show() """
+
 code_forest = """\
-def build_forest(dataset):    
-    data = oml.datasets.get_dataset(dataset) 
+def build_forest(data):    
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
     forest = Pipeline([('Imputer', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
                        ('classifiers', RandomForestClassifier(n_estimators=100, random_state=0))])
@@ -170,8 +258,15 @@ def get_datasets_name(datasets, similar_index):
     return datasets_name """
 
 code_run = """\
-dataset_name, features, importances, indices = build_forest(dataset)
+data = oml.datasets.get_dataset(dataset)
+dataset_name, features, importances, indices = build_forest(data)
 plot_feature_importances(features, importances, indices)"""
+
+code_baseline_plot = """\
+plot_baseline(baseline(data))
+scores, y = regBaseline(data)
+plot_regBaseline(scores, y)
+"""
 
 code_landmarkers_plot = """\
 sns.set(style="whitegrid", font_scale=0.75)
@@ -198,6 +293,29 @@ mask[np.triu_indices_from(mask)] = True
 f, ax = plt.subplots(figsize=(10, 6))
 sns.heatmap(corr, mask=mask, cmap = "BuPu_r", vmax= 1,
             square=True, linewidths=.5, cbar_kws={"shrink": .5})"""
+
+def text_baseline_plot(ds):
+    return """\
+Plot of the baseline acuracy of the various baseline strategies using scikit-learn DummyClassifier.
+
+The target feature is: **""" + ds.default_target_attribute + """**
+
+The following baseline strategies are used: stratified, most_frequent, prior, uniform.
+
+The strategies work as follow according to the sciki-learn API:
+
+- **stratified**: Generates predictions by respecting the training set’s class distribution.
+
+- **most_frequent**: Always predicts the most frequent label in the training set. Also known as ZeroR.
+
+- **prior**: Always predicts the class that maximizes the class prior. 
+
+- **uniform**: Generates predictions uniformly at random.
+
+The horizontal red dotted line denotes the baseline value for this dataset which is equal to the best performing baseline strategy.
+
+[More information.](http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html)
+"""
 
 
 def main():
@@ -226,11 +344,16 @@ def generate_jnb(dataset):
     text_title = """\
     # Automatic Jupyter Notebook for OpenML dataset %s: %s""" % (dataset,ds.name)
     create_block(text_title, code_library)
+    create_block(text_baseline, code_baseline)
+    create_block("TEMP", code_regBaseline)
+    create_block(text_plot_baseline, code_plot_baseline)
+    create_block("TEMP", code_plot_regBaseline)
     create_block(text_model, code_forest)
     create_block(text_plot, code_feature_plot)
-    create_block(text_run, ["dataset =" + str(dataset), code_run])
-    create_block(text_landmarkers,code_get_landmarkers)
-    create_block(text_distances,[code_get_distances,code_compute_similar_datasets,code_get_datasets_name,code_landmarkers_plot,code_similarity_plot])
+    create_block(text_run, ["dataset = " + str(dataset), code_run])
+    create_block(text_baseline_plot(ds), code_baseline_plot)
+    #create_block(text_landmarkers,code_get_landmarkers)
+    #create_block(text_distances,[code_get_distances,code_compute_similar_datasets,code_get_datasets_name,code_landmarkers_plot,code_similarity_plot])
     
     # nb['cells'] = [nbf.v4.new_markdown_cell(text_title),
     #  nbf.v4.new_code_cell(code_library),
@@ -253,7 +376,7 @@ def generate_jnb(dataset):
     with open(fname, 'w', encoding='utf-8') as f:
         nbf.write(nb, f)
 
-    # os.system("jupyter nbconvert --execute --inplace %s"%(fname))
+    os.system("jupyter nbconvert --execute --inplace %s"%(fname))
 
 if __name__ == "__main__":
     main()
