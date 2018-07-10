@@ -4,6 +4,7 @@ import warnings
 import os
 import sys
 import openml as oml
+import ast
 
 warnings.simplefilter(action="ignore", category=RuntimeWarning)
 
@@ -36,9 +37,15 @@ text_plot_regBaseline = """\
 Generates a plot of the regression baseline accuracy of the various baseline strategies using scikit-learn DummyRegressor.
 """
 
+text_plot_alg = """\
+Generates a plot of the accuracy of the machinelearning algorithms against the baseline.
+"""
+
 text_problemType = """\ Undetermined """
 
-
+text_comp = """\
+Complexity threshold to determine if an algorithm will be run.
+"""
 
 text_landmarkers = """\
 The following Landmarking meta-features were calculated and stored in MongoDB: (Matthias Reif et al. 2012, Abdelmessih et al. 2010)
@@ -105,6 +112,27 @@ The strategies work as follow according to the sciki-learn API:
 
 [More information.](http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyRegressor.html)
 """
+
+text_dt = """\
+Runs the decision tree algorithm on the dataset WIP
+"""
+
+text_dtr = """\
+Runs the decision tree regressor algorithm on the dataset WIP
+"""
+
+text_mnb = """\
+Runs the multinomial naive bayes algorithm on the dataset WIP """
+
+text_rf = """\
+Runs the random forest algorithm on the dataset WIP """
+
+text_svc = """\
+Runs the classification support vector algorithm on the dataset WIP
+"""
+
+text_plot_ML = """\
+Plot the accuracy of various machine learning algorithms against the baseline. """
 
 #---------------------------------------------------------------------------------------------------------------------------
 
@@ -211,7 +239,45 @@ def plot_baseline(scores):
     plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
     plt.gca().get_yticklabels()[6].set_color('red')
     fig.tight_layout()
-    plt.show() """
+    plt.show() 
+    return maxBaseline """
+
+code_plot_alg = """\
+def plot_alg(scores, maxBaseline):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    from collections import namedtuple
+
+    strats = scores
+    
+    n_groups = len(strats)
+
+    fig, ax = plt.subplots()
+
+    index = np.arange(n_groups)
+    bar_width = 0.1
+
+    opacity = 0.4
+    error_config = {'ecolor': '0.3'}
+
+    barlist =plt.bar(range(len(strats)), strats.values(), align='center')
+    plt.xticks(range(len(strats)), list(strats.keys()))
+    plt.yticks(np.arange(0, 1.1, step=0.2))
+    plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
+
+    ax.set_ylim(ymin=0)
+    ax.set_ylim(ymax=1)
+    ax.set_xlabel('Machine Learning Algorithm')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Algorithm Performance Predicting Feature: ' + data.default_target_attribute)
+    plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
+    plt.gca().get_yticklabels()[6].set_color('red')
+    for bar in barlist:
+        if bar.get_height() > maxBaseline:
+            bar.set_facecolor('g') 
+    fig.tight_layout()
+    plt.show()  """
 
 code_forest = """\
 def build_forest(data):    
@@ -321,7 +387,7 @@ dataset_name, features, importances, indices = build_forest(data)
 plot_feature_importances(features, importances, indices)"""
 
 code_baseline_plot = """\
-plot_baseline(baseline(data)) """
+maxBaseline = plot_baseline(baseline(data))  """
 
 code_regBaseline_plot = """\
 scores, y = regBaseline(data)
@@ -353,15 +419,145 @@ f, ax = plt.subplots(figsize=(10, 6))
 sns.heatmap(corr, mask=mask, cmap = "BuPu_r", vmax= 1,
             square=True, linewidths=.5, cbar_kws={"shrink": .5})"""
 
+code_dt_1 = """\
+#Runs the decision tree algorithm on the dataset
+from sklearn import tree
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+clf = tree.DecisionTreeClassifier(max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * p)
+complexity = n**2 * p
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats = baseline(data)
+    strats['Decision Tree'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_dtr = """\
+#Runs the decision tree regressor algorithm on the dataset
+from sklearn import tree
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+clf = tree.DecisionTreeRegressor(max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+clf.fit(X_train, y_train)
+acc = clf.score(X_test, y_test)
+#strats = baseline(data)
+#strats['Decision Tree'] = acc
+print(acc) """
+
+code_mnb = """\
+#Runs the Multinomial Naive Bayes algorithm on the dataset
+from sklearn.naive_bayes import MultinomialNB
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = MultinomialNB()
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n * p)
+complexity = n * p
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['naive bayes'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_rf = """\
+#Runs the Random Forest algorithm on the dataset
+from sklearn.ensemble import RandomForestClassifier
+import math
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = RandomForestClassifier()
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * sqrt(p * n_trees))
+complexity = n**2 * math.sqrt(p * 10)
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['random forest'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_svc = """\
+#Runs the Classification Support Vector Machine algorithm on the dataset
+from sklearn import svm
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = svm.SVC()
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * p + n^3)
+complexity = n**2 * p + n**3
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['support vector machine'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_plot_ML = """\
+plot_alg(strats, maxBaseline) """
+
+def code_comp(complexity):
+    return """\
+comp = """ + complexity 
 
 
 
 def main():
-    # print command line arguments
-    for dataset in sys.argv[1:]:
-        print("Generating jupyter notebook for dataset "+str(dataset)+"...")
-        generate_jnb(dataset)
+    # print command line arguments sys.argv[1:]:
+    datasets = ast.literal_eval(sys.argv[1])
+    if len(sys.argv) > 2:
+        comp = sys.argv[2]
+    else:
+        comp = "default"
+        
+    complexity = calc_comp(comp)
 
+        
+    if isinstance(datasets, list):
+        for dataset in datasets:
+            print("Generating jupyter notebook for dataset "+str(dataset)+"...")
+            generate_jnb(dataset, complexity)
+    else:
+        print("Generating jupyter notebook for dataset "+str(datasets)+"...")
+        generate_jnb(datasets, complexity)
+        
+def calc_comp(comp):
+    comp = comp.lower()
+    if comp == "low":
+        return 5000000000000
+    elif comp == "mid":
+        return 50000000000000
+    elif comp == "high":
+        return 5000000000000000
+    elif comp == "inf":
+        return -1
+    else:
+        return 50000000000000
 
 def create_block(text, code):
     if isinstance(text, list):
@@ -405,7 +601,7 @@ Because this is lower or equal than 5% of the dataset we assume that this is a *
         
 
 
-def generate_jnb(dataset):
+def generate_jnb(dataset, complexity):
     nb['cells'] = []
     fname = str(dataset)+'.ipynb'
     ds = oml.datasets.get_dataset(dataset)
@@ -414,6 +610,7 @@ def generate_jnb(dataset):
     # Automatic Jupyter Notebook for OpenML dataset %s: %s""" % (dataset,ds.name)
     create_block(text_title, code_library)
     nb['cells'].append(nbf.v4.new_markdown_cell(text_problemType))
+    create_block(text_comp, code_comp(str(complexity)))
     if not isRegression:
         create_block(text_baseline, code_baseline)
     if isRegression:
@@ -422,13 +619,25 @@ def generate_jnb(dataset):
         create_block(text_plot_baseline, code_plot_baseline)
     if isRegression:
         create_block(text_plot_regBaseline, code_plot_regBaseline)
+    create_block(text_plot_alg, code_plot_alg)
     create_block(text_model, code_forest)
     create_block(text_plot, code_feature_plot)
     create_block(text_run, ["dataset = " + str(dataset), code_run])
     if not isRegression:
         create_block(text_baseline_plot(ds), code_baseline_plot)
     if isRegression:
-        create_block(text_regBaseline_plot(ds), code_regBaseline_plot)    
+        create_block(text_regBaseline_plot(ds), code_regBaseline_plot)
+    if not isRegression:
+        #All classification algorithms here
+        create_block(text_dt,code_dt_1)
+        create_block(text_mnb,code_mnb)
+        create_block(text_rf,code_rf)
+        create_block(text_svc,code_svc)
+        create_block(text_plot_ML,code_plot_ML)
+    if isRegression:
+        #All regression algorithms here
+        create_block(text_dtr,code_dtr)
+        
     
     #create_block(text_landmarkers,code_get_landmarkers)
     #create_block(text_distances,[code_get_distances,code_compute_similar_datasets,code_get_datasets_name,code_landmarkers_plot,code_similarity_plot])
