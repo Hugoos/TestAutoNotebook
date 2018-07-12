@@ -114,25 +114,338 @@ The strategies work as follow according to the sciki-learn API:
 """
 
 text_dt = """\
-Runs the decision tree algorithm on the dataset WIP
+Runs the decision tree classification algorithm with default parameters using scikit-learn DecisionTreeClassifier.
+
+[Explanation of how a decision tree works.](http://scikit-learn.org/stable/modules/tree.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **criterion**:  string, optional (default=”gini”)
+
+The function to measure the quality of a split. Supported criteria are “gini” for the Gini impurity and “entropy” for the information gain.
+
+- **max_depth**: int or None, optional (default=None)
+
+The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+- **min_samples_leaf**:  int, float, optional (default=1)
+
+The minimum number of samples required to be at a leaf node:
+
+- If int, then consider min_samples_leaf as the minimum number.
+- If float, then min_samples_leaf is a percentage and ceil(min_samples_leaf * n_samples) are the minimum number of samples for each node.
+
+
+- **max_features**: int, float, string or None, optional (default=None)
+
+The number of features to consider when looking for the best split:
+
+- If int, then consider max_features features at each split.
+- If float, then max_features is a percentage and int(max_features * n_features) features are considered at each split.
+- If “auto”, then max_features=sqrt(n_features).
+- If “sqrt”, then max_features=sqrt(n_features).
+- If “log2”, then max_features=log2(n_features).
+- If None, then max_features=n_features.
+
+Note: the search for a split does not stop until at least one valid partition of the node samples is found, even if it requires to effectively inspect more than max_features features. 
+
+- **max_leaf_nodes**: int or None, optional (default=None)
+
+Grow a tree with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
 """
 
 text_dtr = """\
-Runs the decision tree regressor algorithm on the dataset WIP
+Runs the decision tree regressor algorithm with default parameters using scikit-learn DecisionTreeRegressor.
+
+[Explanation of how a decision tree works.](http://scikit-learn.org/stable/modules/tree.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **criterion**:  string, optional (default=”mse”)
+
+The function to measure the quality of a split. Supported criteria are “mse” for the mean squared error, which is equal to variance reduction as feature selection criterion and minimizes the L2 loss using the mean of each terminal node, “friedman_mse”, which uses mean squared error with Friedman’s improvement score for potential splits, and “mae” for the mean absolute error, which minimizes the L1 loss using the median of each terminal node.
+
+- **max_depth**: int or None, optional (default=None)
+
+The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+- **min_samples_leaf**:  int, float, optional (default=1)
+
+The minimum number of samples required to be at a leaf node:
+
+- If int, then consider min_samples_leaf as the minimum number.
+- If float, then min_samples_leaf is a percentage and ceil(min_samples_leaf * n_samples) are the minimum number of samples for each node.
+
+
+- **max_features**: int, float, string or None, optional (default=None)
+
+The number of features to consider when looking for the best split:
+
+- If int, then consider max_features features at each split.
+- If float, then max_features is a percentage and int(max_features * n_features) features are considered at each split.
+- If “auto”, then max_features=n_features.
+- If “sqrt”, then max_features=sqrt(n_features).
+- If “log2”, then max_features=log2(n_features).
+- If None, then max_features=n_features.
+
+Note: the search for a split does not stop until at least one valid partition of the node samples is found, even if it requires to effectively inspect more than max_features features.
+
+- **max_leaf_nodes**: int or None, optional (default=None)
+
+Grow a tree with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html)
 """
 
 text_mnb = """\
-Runs the multinomial naive bayes algorithm on the dataset WIP """
+Runs the multinomial naive bayes algorithm with default parameters using scikit-learn MultinomialNB.
+
+[Explanation of how naive bayes works.](http://scikit-learn.org/stable/modules/naive_bayes.html)
+
+The following parameter has been added and can directly be changed in this notebook for further experimentation.
+The description according to the sciki-learn API is:
+
+- **alpha** : float, optional (default=1.0)
+
+Additive (Laplace/Lidstone) smoothing parameter (0 for no smoothing).
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html) """
 
 text_rf = """\
-Runs the random forest algorithm on the dataset WIP """
+Runs the random forest classification algorithm with default parameters using scikit-learn RandomForestClassifier.
+
+[Explanation of how a random forest works.](http://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **n_estimators** : integer, optional (default=10)
+
+The number of trees in the forest.
+
+- **criterion**:  string, optional (default=”gini”)
+
+The function to measure the quality of a split. Supported criteria are “gini” for the Gini impurity and “entropy” for the information gain. Note: this parameter is tree-specific.
+
+- **max_depth**: integer or None, optional (default=None)
+
+The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+- **min_samples_leaf**:  int, float, optional (default=1)
+
+The minimum number of samples required to be at a leaf node:
+
+- If int, then consider min_samples_leaf as the minimum number.
+- If float, then min_samples_leaf is a percentage and ceil(min_samples_leaf * n_samples) are the minimum number of samples for each node.
+
+
+- **max_features**: int, float, string or None, optional (default=”auto”)
+
+The number of features to consider when looking for the best split:
+
+- If int, then consider max_features features at each split.
+- If float, then max_features is a percentage and int(max_features * n_features) features are considered at each split.
+- If “auto”, then max_features=sqrt(n_features).
+- If “sqrt”, then max_features=sqrt(n_features) (same as “auto”).
+- If “log2”, then max_features=log2(n_features).
+- If None, then max_features=n_features.
+
+Note: the search for a split does not stop until at least one valid partition of the node samples is found, even if it requires to effectively inspect more than max_features features.
+
+- **max_leaf_nodes**: int or None, optional (default=None)
+
+Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) """
 
 text_svc = """\
-Runs the classification support vector algorithm on the dataset WIP
+Runs the classification support vector machine algorithm with default parameters using scikit-learn SVC.
+
+[Explanation of how a support vector machine works.](http://scikit-learn.org/stable/modules/svm.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **C** : float, optional (default=1.0)
+
+Penalty parameter C of the error term.
+
+- **kernel**:  string, optional (default=’rbf’)
+
+Specifies the kernel type to be used in the algorithm. It must be one of ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’ or a callable. If none is given, ‘rbf’ will be used. If a callable is given it is used to pre-compute the kernel matrix from data matrices; that matrix should be an array of shape (n_samples, n_samples).
+
+- **gamma**: float, optional (default=’auto’)
+
+Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’. If gamma is ‘auto’ then 1/n_features will be used instead.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
 """
 
 text_plot_ML = """\
 Plot the accuracy of various machine learning algorithms against the baseline. """
+
+text_lr = """\
+Runs the linear regression algorithm with default parameters using scikit-learn LinearRegression.
+
+[Explanation of how linear regression works.](http://scikit-learn.org/stable/modules/linear_model.html)
+
+[More information.](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
+"""
+
+text_rfr = """\
+Runs the random forest regressor algorithm with default parameters using scikit-learnRandomForestClassifierRandomForestRegressor.
+
+[Explanation of how a random forest works.](http://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **n_estimators** : integer, optional (default=10)
+
+The number of trees in the forest.
+
+- **criterion**:  string, optional (default=”mse”)
+
+The function to measure the quality of a split. Supported criteria are “mse” for the mean squared error, which is equal to variance reduction as feature selection criterion, and “mae” for the mean absolute error.
+
+- **max_depth**: integer or None, optional (default=None)
+
+The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+- **min_samples_leaf**:  int, float, optional (default=1)
+
+The minimum number of samples required to be at a leaf node:
+
+- If int, then consider min_samples_leaf as the minimum number.
+- If float, then min_samples_leaf is a percentage and ceil(min_samples_leaf * n_samples) are the minimum number of samples for each node.
+
+
+- **max_features**: int, float, string or None, optional (default=”auto”)
+
+The number of features to consider when looking for the best split:
+
+- If int, then consider max_features features at each split.
+- If float, then max_features is a percentage and int(max_features * n_features) features are considered at each split.
+- If “auto”, then max_features=n_features.
+- If “sqrt”, then max_features=sqrt(n_features).
+- If “log2”, then max_features=log2(n_features).
+- If None, then max_features=n_features.
+
+Note: the search for a split does not stop until at least one valid partition of the node samples is found, even if it requires to effectively inspect more than max_features features.
+
+- **max_leaf_nodes**: int or None, optional (default=None)
+
+Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html)
+"""
+
+text_svr = """\
+Runs the regression support vector machine algorithm with default parameters using scikit-learn SVR.
+
+[Explanation of how a support vector machine works.](http://scikit-learn.org/stable/modules/svm.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **C** : float, optional (default=1.0)
+
+Penalty parameter C of the error term.
+
+- **epsilon** : float, optional (default=0.1)
+
+Epsilon in the epsilon-SVR model. It specifies the epsilon-tube within which no penalty is associated in the training loss function with points predicted within a distance epsilon from the actual value.
+
+- **kernel**:  string, optional (default=’rbf’)
+
+Specifies the kernel type to be used in the algorithm. It must be one of ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’ or a callable. If none is given, ‘rbf’ will be used. If a callable is given it is used to precompute the kernel matrix.
+
+- **gamma**: float, optional (default=’auto’)
+
+Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’. If gamma is ‘auto’ then 1/n_features will be used instead.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html)
+"""
+
+text_cknn = """\
+Runs the classification k-nearest neighbours algorithm with default parameters using scikit-learn KNeighborsClassifier.
+
+[Explanation of how k-nearest neighbours works.](http://scikit-learn.org/stable/modules/neighbors.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **n_neighbors** : int, optional (default = 5)
+
+Number of neighbors to use by default for kneighbors queries.
+
+- **weights** : str or callable, optional (default = ‘uniform’)
+
+weight function used in prediction. Possible values:
+
+- ‘uniform’ : uniform weights. All points in each neighborhood are weighted equally.
+- ‘distance’ : weight points by the inverse of their distance. in this case, closer neighbors of a query point will have a greater influence than neighbors which are further away.
+- [callable] : a user-defined function which accepts an array of distances, and returns an array of the same shape containing the weights.
+
+- algorithm : {‘auto’, ‘ball_tree’, ‘kd_tree’, ‘brute’}, optional
+
+Algorithm used to compute the nearest neighbors:
+
+- ‘ball_tree’ will use BallTree
+- ‘kd_tree’ will use KDTree
+- ‘brute’ will use a brute-force search.
+- ‘auto’ will attempt to decide the most appropriate algorithm based on the values passed to fit method.
+
+Note: fitting on sparse input will override the setting of this parameter, using brute force.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+"""
+
+text_rknn = """\
+Runs the regression k-nearest neighbours algorithm with default parameters using scikit-learn KNeighborsRegressor.
+
+[Explanation of how k-nearest neighbours works.](http://scikit-learn.org/stable/modules/neighbors.html)
+
+The following parameters have been added and can directly be changed in this notebook for further experimentation.
+Their descriptions are according to the sciki-learn API:
+
+- **n_neighbors** : int, optional (default = 5)
+
+Number of neighbors to use by default for kneighbors queries.
+
+- **weights** : str or callable
+
+weight function used in prediction. Possible values:
+
+- ‘uniform’ : uniform weights. All points in each neighborhood are weighted equally.
+- ‘distance’ : weight points by the inverse of their distance. in this case, closer neighbors of a query point will have a greater influence than neighbors which are further away.
+- [callable] : a user-defined function which accepts an array of distances, and returns an array of the same shape containing the weights.
+
+Uniform weights are used by default.
+
+- algorithm : algorithm : {‘auto’, ‘ball_tree’, ‘kd_tree’, ‘brute’}, optional
+
+Algorithm used to compute the nearest neighbors:
+
+- ‘ball_tree’ will use BallTree
+- ‘kd_tree’ will use KDTree
+- ‘brute’ will use a brute-force search.
+- ‘auto’ will attempt to decide the most appropriate algorithm based on the values passed to fit method.
+
+Note: fitting on sparse input will override the setting of this parameter, using brute force.
+
+[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsRegressor.html)
+"""
+
+text_plot_reg_alg = """\
+Plot the accuracy of various machine learning algorithms against the baseline. """
+
+text_clustering = """\
+Clustering problems are currently not supported. """
 
 #---------------------------------------------------------------------------------------------------------------------------
 
@@ -199,12 +512,15 @@ def plot_regBaseline(scores, y):
     plt.plot(x, y, "o")
     plt.axhline(y=np.mean(y), color='r', linestyle='--', label='mean '+ r"$R^2$" + ' = ' + str(round(scores['mean'],4)))
     plt.axhline(y=np.median(y), color='b', linestyle='--', label='median '+ r"$R^2$" + ' = ' + str(round(scores['median'],4)))
+
+    maxBaseline = strats[max(strats, key=strats.get)]
     
     ax.set_xlabel('Data point index')
     ax.set_ylabel(data.default_target_attribute)
 
     plt.legend()
-    plt.show()  """
+    plt.show()
+    return maxBaseline"""
 
 code_plot_baseline = """\
 def plot_baseline(scores):
@@ -275,7 +591,8 @@ def plot_alg(scores, maxBaseline):
     plt.gca().get_yticklabels()[6].set_color('red')
     for bar in barlist:
         if bar.get_height() > maxBaseline:
-            bar.set_facecolor('g') 
+            bar.set_facecolor('g')
+    fig.autofmt_xdate()
     fig.tight_layout()
     plt.show()  """
 
@@ -387,11 +704,13 @@ dataset_name, features, importances, indices = build_forest(data)
 plot_feature_importances(features, importances, indices)"""
 
 code_baseline_plot = """\
-maxBaseline = plot_baseline(baseline(data))  """
+maxBaseline = plot_baseline(baseline(data))
+strats = {} """
 
 code_regBaseline_plot = """\
 scores, y = regBaseline(data)
-plot_regBaseline(scores, y) """
+maxBaseline = plot_regBaseline(scores, y) 
+strats = {} """
 
 code_landmarkers_plot = """\
 sns.set(style="whitegrid", font_scale=0.75)
@@ -423,9 +742,14 @@ code_dt_1 = """\
 #Runs the decision tree algorithm on the dataset
 from sklearn import tree
 #Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
-clf = tree.DecisionTreeClassifier(max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
+clf = tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
 
 p = len(features)
 n = len(X_train)
@@ -435,8 +759,7 @@ complexity = n**2 * p
 if complexity <= comp or comp == -1:
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
-    strats = baseline(data)
-    strats['Decision Tree'] = acc 
+    strats['decision tree'] = acc 
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
@@ -444,26 +767,39 @@ code_dtr = """\
 #Runs the decision tree regressor algorithm on the dataset
 from sklearn import tree
 #Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
-clf = tree.DecisionTreeRegressor(max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
+clf = tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
 X_train = np.nan_to_num(X_train)
 X_test = np.nan_to_num(X_test)
 y_test = np.nan_to_num(y_test)
 y_train = np.nan_to_num(y_train)
-clf.fit(X_train, y_train)
-acc = clf.score(X_test, y_test)
-#strats = baseline(data)
-#strats['Decision Tree'] = acc
-print(acc) """
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * p)
+complexity = n**2 * p
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['decision tree'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
 
 code_mnb = """\
-#Runs the Multinomial Naive Bayes algorithm on the dataset
+#Runs the multinomial naive bayes algorithm on the dataset
 from sklearn.naive_bayes import MultinomialNB
 #Running default values, it is recommended to experiment with the values of the parameters below.
-clf = MultinomialNB()
+clf = MultinomialNB(alpha=1.0)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
 
 p = len(features)
 n = len(X_train)
@@ -478,18 +814,23 @@ else:
     print("computation complexity too high, please run manually if desired.") """
 
 code_rf = """\
-#Runs the Random Forest algorithm on the dataset
+#Runs the random forest algorithm on the dataset
 from sklearn.ensemble import RandomForestClassifier
-import math
-#Running default values, it is recommended to experiment with the values of the parameters below.
-clf = RandomForestClassifier()
+#Running default values, it is recommended to experiment with the values of the parameters below. Try changing n_trees/n_estimators and max_depth.
+n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
+clf = RandomForestClassifier(n_estimators=n_trees, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
 p = len(features)
 n = len(X_train)
-#computational complexity O(n^2 * sqrt(p * n_trees))
-complexity = n**2 * math.sqrt(p * 10)
+#computational complexity O(n^2 * p * n_trees)
+complexity = n**2 * p * n_trees
 
 if complexity <= comp or comp == -1:
     clf.fit(X_train, y_train)
@@ -499,12 +840,17 @@ else:
     print("computation complexity too high, please run manually if desired.") """
 
 code_svc = """\
-#Runs the Classification Support Vector Machine algorithm on the dataset
+#Runs the classification support vector machine algorithm on the dataset
 from sklearn import svm
 #Running default values, it is recommended to experiment with the values of the parameters below.
-clf = svm.SVC()
+clf = svm.SVC(C=1.0, kernel="rbf", gamma="auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
 
 p = len(features)
 n = len(X_train)
@@ -521,23 +867,196 @@ else:
 code_plot_ML = """\
 plot_alg(strats, maxBaseline) """
 
+code_lr = """\
+#Runs the linear regression algorithm on the dataset
+from sklearn.linear_model import LinearRegression
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+clf = LinearRegression()
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(p^2 *n + P^3)
+complexity = p**2 * n + p**3
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['linear regression'] = acc
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_rfr = """\
+#Runs the random forest algorithm on the dataset.
+from sklearn.ensemble import RandomForestRegressor
+#Running default values, it is recommended to experiment with the values of the parameters below.
+n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
+clf = RandomForestRegressor(n_estimators=n_trees, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * p * n_trees)
+complexity = n**2 * p * n_trees
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['random forest'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_svr = """\
+#Runs the regression support vector machine algorithm on the dataset
+from sklearn import svm
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto")
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n^2 * p + n^3)
+complexity = n**2 * p + n**3
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['support vector machine'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
 def code_comp(complexity):
     return """\
-comp = """ + complexity 
+comp = """ + complexity
 
+code_plot_alg_reg = """\
+def plot_alg(scores, maxBaseline):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    from collections import namedtuple
+
+    strats = scores
+    
+    n_groups = len(strats)
+
+    fig, ax = plt.subplots()
+
+    index = np.arange(n_groups)
+    bar_width = 0.1
+
+    opacity = 0.4
+    error_config = {'ecolor': '0.3'}
+    x = list(strats.keys())
+    y = []
+    for strat in x:
+        y.append(strats[strat])
+    markerline, stemlines, baseline = plt.stem(np.arange(n_groups), y, '-.')
+    plt.setp(baseline, color='r', linewidth=2)
+    plt.xticks(range(len(strats)), list(strats.keys()))
+    plt.yticks(np.arange(-1, 1.1, step=0.2))
+    plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
+    plt.plot()
+    ax.set_ylim(ymin=-1)
+    ax.set_ylim(ymax=1)
+    ax.set_xlim(xmin=-0.1)
+    ax.set_xlim(xmax=len(strats)-0.9)
+    ax.set_xlabel('Machine Learning Algorithm')
+    ax.set_ylabel('$R^2$')
+    ax.set_title('Algorithm Performance Predicting Feature: ' + data.default_target_attribute)
+    plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
+    plt.gca().get_yticklabels()[len(plt.gca().get_yticklabels())-1].set_color('red')
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    plt.show() """
+
+code_plot_reg_alg = """\
+plot_alg(strats,maxBaseline) """
+
+code_cknn = """\
+#Runs the classification k-nearest neighbours algorithm on the dataset
+from sklearn.neighbors import KNeighborsClassifier
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto")
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n * p)
+complexity = n * p 
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['k-nearest neighbours'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
+
+code_rknn = """\
+#Runs the regression k-nearest neighbours algorithm on the dataset
+from sklearn.neighbors import KNeighborsRegressor
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto")
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+X_train = np.nan_to_num(X_train)
+X_test = np.nan_to_num(X_test)
+y_test = np.nan_to_num(y_test)
+y_train = np.nan_to_num(y_train)
+
+p = len(features)
+n = len(X_train)
+#computational complexity O(n * p)
+complexity = n * p 
+
+if complexity <= comp or comp == -1:
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    strats['k-nearest neighbours'] = acc 
+else: 
+    print("computation complexity too high, please run manually if desired.") """
 
 
 def main():
     # print command line arguments sys.argv[1:]:
-    datasets = ast.literal_eval(sys.argv[1])
+    datasets = sys.argv[1]
+    if datasets[0] == "[" and datasets[len(datasets)-1] == ",":
+        print("Operation aborted")
+        print("It appears you are trying to convert multiple datasets, please format the first argument as an array without spaces i.e. [1,100,1000]")
+        return 0
+    datasets = ast.literal_eval(datasets)
     if len(sys.argv) > 2:
         comp = sys.argv[2]
     else:
         comp = "default"
         
     complexity = calc_comp(comp)
-
-        
+    
     if isinstance(datasets, list):
         for dataset in datasets:
             print("Generating jupyter notebook for dataset "+str(dataset)+"...")
@@ -573,12 +1092,17 @@ def create_block(text, code):
 
 
 
-def isRegressionProblem(data):
+def findProblemType(data):
+    #0 = classification, 1 = regression, 2 = clustering
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True)
     total = 0
     global text_problemType
     uniqueElementsDict = {}
     answer = -1
+    if y.size == 0:
+        text_problemType = """\
+This dataset has no labels therefore we assume that this is a **clustering** problem. """
+        return 2
     for item in y:
         total += 1
         uniqueElementsDict[item] = ""
@@ -602,42 +1126,56 @@ Because this is lower or equal than 5% of the dataset we assume that this is a *
 
 
 def generate_jnb(dataset, complexity):
+    CLASSIFICATION = 0
+    REGRESSION = 1
+    CLUSTERING = 2
+    
     nb['cells'] = []
     fname = str(dataset)+'.ipynb'
     ds = oml.datasets.get_dataset(dataset)
-    isRegression = isRegressionProblem(ds)
+    problemType = findProblemType(ds)
     text_title = """\
     # Automatic Jupyter Notebook for OpenML dataset %s: %s""" % (dataset,ds.name)
     create_block(text_title, code_library)
     nb['cells'].append(nbf.v4.new_markdown_cell(text_problemType))
     create_block(text_comp, code_comp(str(complexity)))
-    if not isRegression:
+    if problemType == CLASSIFICATION:
         create_block(text_baseline, code_baseline)
-    if isRegression:
+    if problemType == REGRESSION:
         create_block(text_regBaseline, code_regBaseline)
-    if not isRegression:
+    if problemType == CLASSIFICATION:
         create_block(text_plot_baseline, code_plot_baseline)
-    if isRegression:
+        create_block(text_plot_alg, code_plot_alg)
+    if problemType == REGRESSION:
         create_block(text_plot_regBaseline, code_plot_regBaseline)
-    create_block(text_plot_alg, code_plot_alg)
+        create_block(text_plot_alg, code_plot_alg_reg)
+    
     create_block(text_model, code_forest)
     create_block(text_plot, code_feature_plot)
-    create_block(text_run, ["dataset = " + str(dataset), code_run])
-    if not isRegression:
+    if problemType != CLUSTERING:
+        create_block(text_run, ["dataset = " + str(dataset), code_run])
+    if problemType == CLASSIFICATION:
         create_block(text_baseline_plot(ds), code_baseline_plot)
-    if isRegression:
+    if problemType == REGRESSION:
         create_block(text_regBaseline_plot(ds), code_regBaseline_plot)
-    if not isRegression:
+    if problemType == CLASSIFICATION:
         #All classification algorithms here
         create_block(text_dt,code_dt_1)
         create_block(text_mnb,code_mnb)
         create_block(text_rf,code_rf)
         create_block(text_svc,code_svc)
+        create_block(text_cknn,code_cknn)
         create_block(text_plot_ML,code_plot_ML)
-    if isRegression:
+    if problemType == REGRESSION:
         #All regression algorithms here
         create_block(text_dtr,code_dtr)
-        
+        create_block(text_lr,code_lr)
+        create_block(text_rfr,code_rfr)
+        create_block(text_svr,code_svr)
+        create_block(text_rknn,code_rknn)
+        create_block(text_plot_reg_alg,code_plot_reg_alg)
+    if problemType == CLUSTERING:
+        nb['cells'].append(nbf.v4.new_markdown_cell(text_clustering))
     
     #create_block(text_landmarkers,code_get_landmarkers)
     #create_block(text_distances,[code_get_distances,code_compute_similar_datasets,code_get_datasets_name,code_landmarkers_plot,code_similarity_plot])
