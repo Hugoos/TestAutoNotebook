@@ -114,11 +114,11 @@ The strategies work as follow according to the sciki-learn API:
 """
 
 text_dt = """\
-Runs the decision tree classification algorithm with default parameters using scikit-learn DecisionTreeClassifier.
+Runs the decision tree classification algorithm with default hyperparameters using scikit-learn DecisionTreeClassifier.
 
 [Explanation of how a decision tree works.](http://scikit-learn.org/stable/modules/tree.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **criterion**:  string, optional (default=”gini”)
@@ -154,15 +154,15 @@ Note: the search for a split does not stop until at least one valid partition of
 
 Grow a tree with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html)
 """
 
 text_dtr = """\
-Runs the decision tree regressor algorithm with default parameters using scikit-learn DecisionTreeRegressor.
+Runs the decision tree regressor algorithm with default hyperparameters using scikit-learn DecisionTreeRegressor.
 
 [Explanation of how a decision tree works.](http://scikit-learn.org/stable/modules/tree.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **criterion**:  string, optional (default=”mse”)
@@ -198,29 +198,29 @@ Note: the search for a split does not stop until at least one valid partition of
 
 Grow a tree with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html)
 """
 
 text_mnb = """\
-Runs the multinomial naive bayes algorithm with default parameters using scikit-learn MultinomialNB.
+Runs the multinomial naive bayes algorithm with default hyperparameters using scikit-learn MultinomialNB.
 
 [Explanation of how naive bayes works.](http://scikit-learn.org/stable/modules/naive_bayes.html)
 
-The following parameter has been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameter has been added and can directly be changed in this notebook for further experimentation.
 The description according to the sciki-learn API is:
 
 - **alpha** : float, optional (default=1.0)
 
 Additive (Laplace/Lidstone) smoothing parameter (0 for no smoothing).
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html) """
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html) """
 
 text_rf = """\
-Runs the random forest classification algorithm with default parameters using scikit-learn RandomForestClassifier.
+Runs the random forest classification algorithm with default hyperparameters using scikit-learn RandomForestClassifier.
 
 [Explanation of how a random forest works.](http://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **n_estimators** : integer, optional (default=10)
@@ -260,14 +260,14 @@ Note: the search for a split does not stop until at least one valid partition of
 
 Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) """
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html) """
 
 text_svc = """\
-Runs the classification support vector machine algorithm with default parameters using scikit-learn SVC.
+Runs the classification support vector machine algorithm with default hyperparameters using scikit-learn SVC.
 
 [Explanation of how a support vector machine works.](http://scikit-learn.org/stable/modules/svm.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **C** : float, optional (default=1.0)
@@ -282,14 +282,14 @@ Specifies the kernel type to be used in the algorithm. It must be one of ‘line
 
 Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’. If gamma is ‘auto’ then 1/n_features will be used instead.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
 """
 
 text_plot_ML = """\
 Plot the accuracy of various machine learning algorithms against the baseline. """
 
 text_lr = """\
-Runs the linear regression algorithm with default parameters using scikit-learn LinearRegression.
+Runs the linear regression algorithm with default hyperparameters using scikit-learn LinearRegression.
 
 [Explanation of how linear regression works.](http://scikit-learn.org/stable/modules/linear_model.html)
 
@@ -297,11 +297,11 @@ Runs the linear regression algorithm with default parameters using scikit-learn 
 """
 
 text_rfr = """\
-Runs the random forest regressor algorithm with default parameters using scikit-learnRandomForestClassifierRandomForestRegressor.
+Runs the random forest regressor algorithm with default hyperparameters using scikit-learnRandomForestClassifierRandomForestRegressor.
 
 [Explanation of how a random forest works.](http://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **n_estimators** : integer, optional (default=10)
@@ -341,15 +341,15 @@ Note: the search for a split does not stop until at least one valid partition of
 
 Grow trees with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity. If None then unlimited number of leaf nodes.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html)
 """
 
 text_svr = """\
-Runs the regression support vector machine algorithm with default parameters using scikit-learn SVR.
+Runs the regression support vector machine algorithm with default hyperparameters using scikit-learn SVR.
 
 [Explanation of how a support vector machine works.](http://scikit-learn.org/stable/modules/svm.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **C** : float, optional (default=1.0)
@@ -368,15 +368,15 @@ Specifies the kernel type to be used in the algorithm. It must be one of ‘line
 
 Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’. If gamma is ‘auto’ then 1/n_features will be used instead.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html)
 """
 
 text_cknn = """\
-Runs the classification k-nearest neighbours algorithm with default parameters using scikit-learn KNeighborsClassifier.
+Runs the classification k-nearest neighbours algorithm with default hyperparameters using scikit-learn KNeighborsClassifier.
 
 [Explanation of how k-nearest neighbours works.](http://scikit-learn.org/stable/modules/neighbors.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **n_neighbors** : int, optional (default = 5)
@@ -402,15 +402,15 @@ Algorithm used to compute the nearest neighbors:
 
 Note: fitting on sparse input will override the setting of this parameter, using brute force.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
 """
 
 text_rknn = """\
-Runs the regression k-nearest neighbours algorithm with default parameters using scikit-learn KNeighborsRegressor.
+Runs the regression k-nearest neighbours algorithm with default hyperparameters using scikit-learn KNeighborsRegressor.
 
 [Explanation of how k-nearest neighbours works.](http://scikit-learn.org/stable/modules/neighbors.html)
 
-The following parameters have been added and can directly be changed in this notebook for further experimentation.
+The following hyperparameters have been added and can directly be changed in this notebook for further experimentation.
 Their descriptions are according to the sciki-learn API:
 
 - **n_neighbors** : int, optional (default = 5)
@@ -438,7 +438,7 @@ Algorithm used to compute the nearest neighbors:
 
 Note: fitting on sparse input will override the setting of this parameter, using brute force.
 
-[More information and additional parameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsRegressor.html)
+[More information and additional hyperparameters.](http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsRegressor.html)
 """
 
 text_plot_reg_alg = """\
@@ -741,7 +741,7 @@ sns.heatmap(corr, mask=mask, cmap = "BuPu_r", vmax= 1,
 code_dt_1 = """\
 #Runs the decision tree algorithm on the dataset
 from sklearn import tree
-#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
 clf = tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -766,7 +766,7 @@ else:
 code_dtr = """\
 #Runs the decision tree regressor algorithm on the dataset
 from sklearn import tree
-#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
 clf = tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -791,7 +791,7 @@ else:
 code_mnb = """\
 #Runs the multinomial naive bayes algorithm on the dataset
 from sklearn.naive_bayes import MultinomialNB
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 clf = MultinomialNB(alpha=1.0)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -816,7 +816,7 @@ else:
 code_rf = """\
 #Runs the random forest algorithm on the dataset
 from sklearn.ensemble import RandomForestClassifier
-#Running default values, it is recommended to experiment with the values of the parameters below. Try changing n_trees/n_estimators and max_depth.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try changing n_trees/n_estimators and max_depth.
 n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
 clf = RandomForestClassifier(n_estimators=n_trees, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
@@ -842,7 +842,7 @@ else:
 code_svc = """\
 #Runs the classification support vector machine algorithm on the dataset
 from sklearn import svm
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 clf = svm.SVC(C=1.0, kernel="rbf", gamma="auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -870,7 +870,7 @@ plot_alg(strats, maxBaseline) """
 code_lr = """\
 #Runs the linear regression algorithm on the dataset
 from sklearn.linear_model import LinearRegression
-#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
+#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
 clf = LinearRegression()
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -895,7 +895,7 @@ else:
 code_rfr = """\
 #Runs the random forest algorithm on the dataset.
 from sklearn.ensemble import RandomForestRegressor
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
 clf = RandomForestRegressor(n_estimators=n_trees, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
@@ -921,7 +921,7 @@ else:
 code_svr = """\
 #Runs the regression support vector machine algorithm on the dataset
 from sklearn import svm
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 clf = svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -994,7 +994,7 @@ plot_alg(strats,maxBaseline) """
 code_cknn = """\
 #Runs the classification k-nearest neighbours algorithm on the dataset
 from sklearn.neighbors import KNeighborsClassifier
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 clf = KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
@@ -1019,7 +1019,7 @@ else:
 code_rknn = """\
 #Runs the regression k-nearest neighbours algorithm on the dataset
 from sklearn.neighbors import KNeighborsRegressor
-#Running default values, it is recommended to experiment with the values of the parameters below.
+#Running default values, it is recommended to experiment with the values of the hyperparameters below.
 clf = KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
