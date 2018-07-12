@@ -1,6 +1,8 @@
 # Automatic Jupyter Notebook
 
+WORK IN PROGRESS
 Test version
+
 This is a project about automatic generating Jupyter Notebook for OpenML dataset.
 The program will pull an OpenML dataset from their servers using the datasetID.
 The program will attempt to classify what kind of machine learning problem can be solved based on the target feature.
@@ -24,7 +26,9 @@ If you want to generate multiple notebooks use one of the following commands:
 python auto-jupyter-notebook [datasetID1,datasetID2,ect] 
 python auto-jupyter-notebook [datasetID1,datasetID2,ect] complexity
 ```
-Note that there mustn't be any spaces within the first argument and it must be formatted as a list.
+Note that there must not be any spaces within the first argument and it must be formatted as a list.
 
 The output file is called datasetID.ipynb 
+
+
 
