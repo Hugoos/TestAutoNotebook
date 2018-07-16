@@ -739,128 +739,188 @@ sns.heatmap(corr, mask=mask, cmap = "BuPu_r", vmax= 1,
             square=True, linewidths=.5, cbar_kws={"shrink": .5})"""
 
 code_dt_1 = """\
-#Runs the decision tree algorithm on the dataset
+#Runs the decision tree classifier algorithm on the dataset
 from sklearn import tree
-#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
 clf = tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p)
 complexity = n**2 * p
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['decision tree'] = acc 
+    for x in range(1,folds+1):
+        if (n**2 * p * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['decision tree'] = acc / folds
 else: 
-    print("computation complexity too high, please run manually if desired.") """
+    print("computation complexity too high, please run manually if desired.")   """
 
 code_dtr = """\
 #Runs the decision tree regressor algorithm on the dataset
 from sklearn import tree
-#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
 clf = tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
-X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);  
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p)
 complexity = n**2 * p
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['decision tree'] = acc 
+    for x in range(1,folds+1):
+        if (n**2 * p * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['decision tree'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
 code_mnb = """\
 #Runs the multinomial naive bayes algorithm on the dataset
 from sklearn.naive_bayes import MultinomialNB
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
 clf = MultinomialNB(alpha=1.0)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n * p)
 complexity = n * p
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['naive bayes'] = acc 
+    for x in range(1,folds+1):
+        if ((n * p) * x ) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['naive bayes'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
 code_rf = """\
-#Runs the random forest algorithm on the dataset
+#Runs the random forest classifier algorithm on the dataset
 from sklearn.ensemble import RandomForestClassifier
-#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try changing n_trees/n_estimators and max_depth.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below. Try changing n_trees/n_estimators and max_depth.
 n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
 clf = RandomForestClassifier(n_estimators=n_trees, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p * n_trees)
 complexity = n**2 * p * n_trees
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['random forest'] = acc 
+    for x in range(1,folds+1):
+        if (n**2 * p * n_trees) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['random forest'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
 code_svc = """\
 #Runs the classification support vector machine algorithm on the dataset
 from sklearn import svm
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
-clf = svm.SVC(C=1.0, kernel="rbf", gamma="auto")
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
+clf = svm.SVC(C =1.0, kernel="rbf", gamma="auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p + n^3)
 complexity = n**2 * p + n**3
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['support vector machine'] = acc 
+    for x in range(1,folds+1):
+        if ((n**2 * p + n**3) * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['support vector machine'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
@@ -870,76 +930,112 @@ plot_alg(strats, maxBaseline) """
 code_lr = """\
 #Runs the linear regression algorithm on the dataset
 from sklearn.linear_model import LinearRegression
-#Running default values, it is recommended to experiment with the values of the hyperparameters below. Try min_samples_leaf=5
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
 clf = LinearRegression()
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(p^2 *n + P^3)
 complexity = p**2 * n + p**3
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['linear regression'] = acc
+    for x in range(1,folds+1):
+        if ((p**2 * n + p**3) * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['linear regression'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
 code_rfr = """\
 #Runs the random forest algorithm on the dataset.
 from sklearn.ensemble import RandomForestRegressor
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
 n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
 clf = RandomForestRegressor(n_estimators=n_trees, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p * n_trees)
 complexity = n**2 * p * n_trees
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['random forest'] = acc 
+    for x in range(1,folds+1):
+        if (n**2 * p * n_trees) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['random forest'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
 code_svr = """\
 #Runs the regression support vector machine algorithm on the dataset
 from sklearn import svm
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
 clf = svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n^2 * p + n^3)
 complexity = n**2 * p + n**3
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['support vector machine'] = acc 
+    for x in range(1,folds+1):
+        if (((n**2 * p) + n**3) * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['support vector machine'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
@@ -994,50 +1090,74 @@ plot_alg(strats,maxBaseline) """
 code_cknn = """\
 #Runs the classification k-nearest neighbours algorithm on the dataset
 from sklearn.neighbors import KNeighborsClassifier
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
 clf = KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n * p)
 complexity = n * p 
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['k-nearest neighbours'] = acc 
+    for x in range(1,folds+1):
+        if (n * p * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['k-nearest neighbours'] = acc / folds
 else: 
-    print("computation complexity too high, please run manually if desired.") """
+    print("computation complexity too high, please run manually if desired.")  """
 
 code_rknn = """\
 #Runs the regression k-nearest neighbours algorithm on the dataset
 from sklearn.neighbors import KNeighborsRegressor
-#Running default values, it is recommended to experiment with the values of the hyperparameters below.
+from sklearn.model_selection import KFold
+#Running default values, it is recommended to experiment with the values of the parameters below.
 clf = KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto")
 X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+folds = 10
+acc = 0
 
-X_train = np.nan_to_num(X_train)
-X_test = np.nan_to_num(X_test)
-y_test = np.nan_to_num(y_test)
-y_train = np.nan_to_num(y_train)
+X = np.nan_to_num(X) 
+y = np.nan_to_num(y)
 
 p = len(features)
-n = len(X_train)
+n = len(X)
 #computational complexity O(n * p)
 complexity = n * p 
 
 if complexity <= comp or comp == -1:
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    strats['k-nearest neighbours'] = acc 
+    for x in range(1,folds+1):
+        if (n * p * x) > comp and comp != -1:
+            folds = x-1
+            print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
+            break
+    if folds > len(y):
+        print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
+        folds = len(y)
+    kf = KFold(n_splits=folds) 
+    for train_index, test_index in kf.split(X,y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        acc += clf.score(X_test, y_test)
+    strats['k-nearest neighbours'] = acc / folds
 else: 
     print("computation complexity too high, please run manually if desired.") """
 
