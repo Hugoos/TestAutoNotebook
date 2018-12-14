@@ -1090,8 +1090,12 @@ def code_library(dataset):
 from scripts.preamble import *
 did = """ + str(dataset) + """
 data = oml.datasets.get_dataset(did)
-task, topList, strats = printTopNFlows(did, 10) 
+task, topList, strats = printTopNFlows(did, data.default_target_attribute, 10) 
 topList """
+
+run_similarity = """\
+from scripts.localDataOpenMLInterface import *
+showTopNSimilarDatasets("datasetSimilarityMatrixNormalized", did, 10) """
 
 run_problemType = """\
 from scripts.problemType import *

@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn import tree
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import MultinomialNB
+from sklearn import *
 
 from tpot import TPOTClassifier
 from tpot import TPOTRegressor
@@ -17,8 +18,10 @@ from tpot import TPOTRegressor
 from textwrap import wrap
 
 import openml as oml
+from openml import tasks, flows, runs
+from openml.exceptions import PyOpenMLError
 
-import xml.parsers.expat
+from xml.parsers.expat import ExpatError
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,26 +32,42 @@ CLUSTERING = "Clustering"
 
 #High level functions
 
-def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction = False, runTPOT = False):
-
+def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction = False, runTPOT = False, timeLimit = 300000):
+    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
+    p = len(features)
+    n = len(X)
+    #unitValueMs = 0.01135917705 
     if problemType == CLASSIFICATION:
-        strats = decisionTreeClassifier(data, comp, strats, task, showRuntimePrediction)
-        strats = naiveBayes(data, comp, strats, task, showRuntimePrediction)
-        strats = randomForestClassifier(data, comp, strats, task, showRuntimePrediction)
-        strats = classificationSVM(data, comp, strats, task, showRuntimePrediction)
-        strats = classificationKNN(data, comp, strats, task, showRuntimePrediction)
+        strats = runMLAlgorithm(tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "decision tree", strats, task, showRuntimePrediction, "J48", timeLimit, isTooLong(n**2 * p, comp))
+        strats = runMLAlgorithm(MultinomialNB(alpha=1.0),
+                                "naive bayes", strats, task, showRuntimePrediction, "NaiveBayes", timeLimit, isTooLong(n * p, comp))
+        strats = runMLAlgorithm(RandomForestClassifier(n_estimators=10, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "random forest", strats, task, showRuntimePrediction, "RandomForest", timeLimit, isTooLong(n**2 * p * 10, comp))
+        strats = runMLAlgorithm(svm.SVC(C =1.0, kernel="rbf", gamma="auto"),
+                                "support vector machine", strats, task, showRuntimePrediction, "SVM", timeLimit, isTooLong(n**2 * p + n**3, comp))
+        strats = runMLAlgorithm(KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
+                                "k-nearest neighbours", strats, task, showRuntimePrediction, "IBk", timeLimit, isTooLong(n**2 * p * 10, comp)) #multiplying by 10 gives more accurate predictions
         if runTPOT:
             strats = TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction)
 
     if problemType == REGRESSION:
-        strats = decisionTreeRegressor(data, comp, strats, task, showRuntimePrediction)
-        strats = linearRegression(data, comp, strats, task, showRuntimePrediction)
-        strats = randomForestRegressor(data, comp, strats, task, showRuntimePrediction)
-        strats = regressionSVM(data, comp, strats, task, showRuntimePrediction)
-        strats = regressionKNN(data, comp, strats, task, showRuntimePrediction)
+        strats = runMLAlgorithm(tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "decision tree", strats, task, showRuntimePrediction, "REPTree", timeLimit, isTooLong(n**2 * p, comp))
+        strats = runMLAlgorithm(LinearRegression(),
+                                "linear regression", strats, task, showRuntimePrediction, "LinearRegression", timeLimit, isTooLong(p**2 * n + p**3, comp))
+        strats = runMLAlgorithm(RandomForestRegressor(n_estimators=10, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "random forest", strats, task, showRuntimePrediction, "RandomForest", timeLimit, isTooLong(n**2 * p * 10, comp))
+        strats = runMLAlgorithm(svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto"),
+                                "support vector machine", strats, task, showRuntimePrediction, "SMOreg", timeLimit, isTooLong(n**2 * p + n**3, comp))
+        strats = runMLAlgorithm(KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
+                                "k-nearest neighbours", strats, task, showRuntimePrediction, "IBk", timeLimit, isTooLong(n**2 * p * 10, comp)) # multiplying by 10 gives more accurate predictions
         if runTPOT:
             strats = TPOTAutoMLRegressor(data, comp, strats, task, showRuntimePrediction)
     return strats
+
+def isTooLong(runtime, comp):
+    return (runtime > comp)
 
 def plot_alg(data, strats, maxBaseline, problemType):
 
@@ -138,408 +157,28 @@ def plotScatterSimple(x,y,xlabel,ylabel,title):
 
 #Classification
 
-def decisionTreeClassifier(data, comp, strats, task, showRuntimePrediction):
-    #Runs the decision tree classifier algorithm on the dataset
-    #Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
-    clf = tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
+def runMLAlgorithm(clf, name, strats, task, showRuntimePrediction, RTPName, timeLimit, tooLong):
     acc = 0
-    
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
+    expectedRuntime = -1
     if showRuntimePrediction:
-        getAverageRuntime("J48", task)
+        expectedRuntime = getAverageRuntime(RTPName, task)
+    if (expectedRuntime <= timeLimit and expectedRuntime != -1) or (not tooLong and expectedRuntime  == -1):
+        taskId = tasks.get_task(getTaskId(task))
+        flow = flows.sklearn_to_flow(clf)
+        try:
+            run = runs.run_flow_on_task(taskId, flow, avoid_duplicate_runs = True)
+        except PyOpenMLError:
+            print("Run already exists in OpenML, WIP")
+            return strats
+        feval = dict(run.fold_evaluations['predictive_accuracy'][0])
 
-    #computational complexity O(n^2 * p)
-    complexity = n**2 * p
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (n**2 * p * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['decision tree'] = acc / folds
+        for val in feval.values():
+            acc += val
+        strats[name] = acc / 10
+        run.publish()
+        run.push_tag("auto-jupyter-notebook")
     else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def naiveBayes(data, comp, strats, task, showRuntimePrediction):
-    # Runs the multinomial naive bayes algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below.
-    clf = MultinomialNB(alpha=1.0)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("NaiveBayes", task)
-    
-    # computational complexity O(n * p)
-    complexity = n * p
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if ((n * p) * x ) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['naive bayes'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def randomForestClassifier(data, comp, strats, task, showRuntimePrediction):
-    # Runs the random forest classifier algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below. Try changing n_trees/n_estimators and max_depth.
-    n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
-    clf = RandomForestClassifier(n_estimators=n_trees, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("RandomForest", task)
-
-    #computational complexity O(n^2 * p * n_trees)
-    complexity = n**2 * p * n_trees
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (n**2 * p * n_trees) * x > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['random forest'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def classificationSVM(data, comp, strats, task, showRuntimePrediction):
-    # Runs the classification support vector machine algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below.
-    clf = svm.SVC(C =1.0, kernel="rbf", gamma="auto")
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("SVM", task)
-
-    #computational complexity O(n^2 * p + n^3)
-    complexity = n**2 * p + n**3
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if ((n**2 * p + n**3) * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['support vector machine'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def classificationKNN(data, comp, strats, task, showRuntimePrediction):
-        #Runs the classification k-nearest neighbours algorithm on the dataset
-    #Running default values, it is recommended to experiment with the values of the parameters below.
-    clf = KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto")
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("IBk", task)
-    
-    #computational complexity O(n^2 * p)
-    complexity = n**2 * p * 10 #multiplying by 10 gives more accurate predictions
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (((n**2 * p)*10) * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['k-nearest neighbours'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-#Regression
-
-def decisionTreeRegressor(data, comp, strats, task, showRuntimePrediction):
-    # Runs the decision tree regressor algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
-    clf = tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);  
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X) 
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("REPTree", task)
-    
-    # computational complexity O(n^2 * p)
-    complexity = n**2 * p
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (n**2 * p * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds) 
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['decision tree'] = acc / folds
-    else: 
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def linearRegression(data, comp, strats, task, showRuntimePrediction):
-    # Runs the linear regression algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below. Try min_samples_leaf=5
-    clf = LinearRegression()
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("LinearRegression", task)
-
-    # computational complexity O(p^2 *n + P^3)
-    complexity = p**2 * n + p**3
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if ((p**2 * n + p**3) * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['linear regression'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def randomForestRegressor(data, comp, strats, task, showRuntimePrediction):
-    # Runs the random forest algorithm on the dataset.
-    # Running default values, it is recommended to experiment with the values of the parameters below.
-    n_trees = 10 #Sets n_estimators such that the complexity value is calculated correctly.
-    clf = RandomForestRegressor(n_estimators=n_trees, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("RandomForest", task)
-            
-    # computational complexity O(n^2 * p * n_trees)
-    complexity = n**2 * p * n_trees
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (n**2 * p * n_trees) * x > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['random forest'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def regressionSVM(data, comp, strats, task, showRuntimePrediction):
-    # Runs the regression support vector machine algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below.
-    clf = svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto")
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("SMOreg", task)
-            
-    # computational complexity O(n^2 * p + n^3)
-    complexity = n**2 * p + n**3
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (((n**2 * p) + n**3) * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['support vector machine'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
-    return strats
-
-def regressionKNN(data, comp, strats, task, showRuntimePrediction):
-    # Runs the regression k-nearest neighbours algorithm on the dataset
-    # Running default values, it is recommended to experiment with the values of the parameters below.
-    clf = KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto")
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    folds = 10
-    acc = 0
-
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-
-    p = len(features)
-    n = len(X)
-
-    if showRuntimePrediction:
-        getAverageRuntime("IBk", task)
-            
-    # computational complexity O(n^2 * p)
-    complexity = n**2 * p * 10  # multiplying by 10 gives more accurate predictions
-
-    if complexity <= comp or comp == -1:
-        for x in range(1,folds+1):
-            if (((n**2 * p)*10) * x) > comp and comp != -1:
-                folds = x-1
-                print("Number of folds would increase the complexity over the given threshold, number of folds has been set to: " + str(folds))
-                break
-        if folds > len(y):
-            print("Number of folds are larger than number of samples, number of folds has been set to: " + str(len(y)))
-            folds = len(y)
-        kf = KFold(n_splits=folds)
-        for train_index, test_index in kf.split(X,y):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            clf.fit(X_train, y_train)
-            acc += clf.score(X_test, y_test)
-        strats['k-nearest neighbours'] = acc / folds
-    else:
-        print("computation complexity too high, please run manually if desired.")
+        print("Skipping run because of time limit set")
     return strats
 
 def TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction):
@@ -640,11 +279,28 @@ def getAverageRuntime(algName, task):
                     totalRunTime += run.evaluations['usercpu_time_millis']
         except KeyError:
             print("KeyError")
+            return -1
         except ExpatError:
             print("ExpatError, skipped run")
+            return -1
     if count != 0:
         x = np.array(x)
         y = np.array(y)
         print("Median execution time in ms: " + str(np.median(x)))
         print("Mean execution time in ms: " + str(totalRunTime / count))
         plotScatterSimple(x,y,'usercpu_time_millis','accuracy','Execution times for ' + algName)
+        return np.median(x)
+    return -1
+
+def getTaskId(task):
+    return task[next(iter(task))]['task_id']
+
+def testFunction(data):
+    #clf = sklearn.ensemble.forest.RandomForestClassifier(bootstrap:true,weight:null,criterion:"gini",depth:null,features:"auto",nodes:null,decrease:0.0,split:null,leaf:1,split:2,leaf:0.0,estimators:10,jobs:1,score:false,state:6826,verbose:0,start:false)
+    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
+    X = np.nan_to_num(X)
+    y = np.nan_to_num(y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    clf.fit(X_train, y_train)
+    acc = clf.score(X_test, y_test)
+    print(acc)

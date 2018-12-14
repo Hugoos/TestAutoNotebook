@@ -27,10 +27,13 @@ def findProblemType(data):
 
 def checkTask(task, problemType, target):
     if task == -1:
-        return 
-    taskValues = next(iter(task.values()))
-    taskInfo = oml.tasks.get_task(taskValues['task_id'])
-    if taskInfo.task_type == problemType and taskInfo.target_name == target:
-        print("Using correct task")
+        return
+    if bool(task.values()):
+        taskValues = next(iter(task.values()))
+        taskInfo = oml.tasks.get_task(taskValues['task_id'])
+        if taskInfo.task_type == problemType and taskInfo.target_name == target:
+            print("Using correct task")
+        else:
+            print("Task does not match standard target")
     else:
-        print("Task does not match standard target")
+        print("Task is empty so cannot be checked, possibly due to a bug in OpenML")

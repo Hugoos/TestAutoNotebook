@@ -42,16 +42,16 @@ def getDatasetTasks(did):
             dtlist[key] = value
     return dtlist
 
-def getTopTask(tasks):
+def getTopTask(tasks, defaultTF):
     topAmountRuns = 0
     topTaskDict = {}
     for key, value in tasks.items():
         amountRuns = len(oml.runs.list_runs(task=[key]))
-        if amountRuns > topAmountRuns:
+        if value['estimation_procedure'] == '10-fold Crossvalidation' and value['target_feature'] == defaultTF and amountRuns >= topAmountRuns:
             topAmountRuns = amountRuns
             topTaskDict = {}
             topTaskDict[key] = value
-    if bool(topTaskDict): 
+    if bool(topTaskDict):
         for key, value in topTaskDict.items():
             return oml.runs.list_runs(task=[key])
     else:
@@ -77,9 +77,9 @@ def getTopNFlows(task):
         print("No compatible runs found")
     return scores, strats
 
-def printTopNFlows(did, N):
+def printTopNFlows(did, defaultTF, N):
     tasks = getDatasetTasks(did)
-    topTask = getTopTask(tasks)
+    topTask = getTopTask(tasks, defaultTF)
     if topTask != -1:
         scores, strats = getTopNFlows(topTask)
         return topTask, pd.DataFrame.from_dict(scores)[:N], strats

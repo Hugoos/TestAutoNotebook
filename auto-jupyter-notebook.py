@@ -73,6 +73,7 @@ def generate_jnb(dataset, complexity):
     # Automatic Jupyter Notebook for OpenML dataset %s: %s""" % (dataset,ds.name)
     create_block(text_title, code_library(dataset))
     nb['cells'].append(nbf.v4.new_code_cell(run_problemType))
+    nb['cells'].append(nbf.v4.new_code_cell(run_similarity))
     create_block(text_comp, code_comp(str(complexity)))
     nb['cells'].append(nbf.v4.new_code_cell(run_featureImportance))
     nb['cells'].append(nbf.v4.new_code_cell(run_baselines))
