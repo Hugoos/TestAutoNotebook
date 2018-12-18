@@ -1,6 +1,6 @@
 # Automatic Jupyter Notebook
 
-WORK IN PROGRESS
+WORK IN PROGRESS --THIS README IS OUTDATED, WILL BE UPDATED AT A LATER DATE--
 Test version
 
 This is a project about automatic generating Jupyter Notebook for OpenML dataset.
