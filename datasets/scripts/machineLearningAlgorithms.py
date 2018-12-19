@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn import tree
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import MultinomialNB
+from sklearn import impute
 from sklearn import *
 
 from tpot import TPOTClassifier
@@ -100,8 +101,8 @@ def plot_reg_alg(data, strats, maxBaseline):
     plt.yticks(np.arange(-1, 1.1, step=0.2))
     plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
     plt.plot()
-    ax.set_ylim(ymin=-1)
-    ax.set_ylim(ymax=1)
+    ax.set_ylim(bottom=-1)
+    ax.set_ylim(top=1)
     ax.set_xlim(xmin=-0.1)
     ax.set_xlim(xmax=len(strats)-0.9)
     ax.set_xlabel('Machine Learning Algorithm')
@@ -130,8 +131,8 @@ def plot_class_alg(data, strats, maxBaseline):
     plt.yticks(np.arange(0, 1.1, step=0.2))
     plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
 
-    ax.set_ylim(ymin=0)
-    ax.set_ylim(ymax=1)
+    ax.set_ylim(bottom=0)
+    ax.set_ylim(top=1)
     ax.set_xlabel('Machine Learning Algorithm')
     ax.set_ylabel('Accuracy')
     ax.set_title('Algorithm Performance Predicting Feature: ' + data.default_target_attribute)
@@ -157,13 +158,21 @@ def plotScatterSimple(x,y,xlabel,ylabel,title):
 
 #Classification
 
-def runMLAlgorithm(clf, name, strats, task, showRuntimePrediction, RTPName, timeLimit, tooLong):
+def runMLAlgorithm(estimator, name, strats, task, showRuntimePrediction, RTPName, timeLimit, tooLong):
     acc = 0
     expectedRuntime = -1
     if showRuntimePrediction:
         expectedRuntime = getAverageRuntime(RTPName, task)
     if (expectedRuntime <= timeLimit and expectedRuntime != -1) or (not tooLong and expectedRuntime  == -1):
         taskId = tasks.get_task(getTaskId(task))
+        
+        clf = pipeline.Pipeline(
+            steps=[
+                ('imputer', impute.SimpleImputer()),
+                ('estimator', estimator)
+            ]
+        )
+        
         flow = flows.sklearn_to_flow(clf)
         try:
             run = runs.run_flow_on_task(taskId, flow, avoid_duplicate_runs = True)
@@ -297,10 +306,21 @@ def getTaskId(task):
 
 def testFunction(data):
     #clf = sklearn.ensemble.forest.RandomForestClassifier(bootstrap:true,weight:null,criterion:"gini",depth:null,features:"auto",nodes:null,decrease:0.0,split:null,leaf:1,split:2,leaf:0.0,estimators:10,jobs:1,score:false,state:6826,verbose:0,start:false)
-    X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
-    X = np.nan_to_num(X)
-    y = np.nan_to_num(y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    print(acc)
+    #X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
+
+    run = oml.runs.get_run(1836360)
+    print(run.flow_id)
+    flow = oml.flows.get_flow(4834, reinstantiate=True)
+    run = runs.run_flow_on_task(55, flow, avoid_duplicate_runs = True)
+
+    feval = dict(run.fold_evaluations['predictive_accuracy'][0])
+
+    for val in feval.values():
+        acc += val
+    print(acc / 10)
+    #X = np.nan_to_num(X)
+    #y = np.nan_to_num(y)
+    #X_train, X_test, y_train, y_test = train_test_split(X, y)
+    #clf.fit(X_train, y_train)
+    #acc = clf.score(X_test, y_test)
+    #print(acc)

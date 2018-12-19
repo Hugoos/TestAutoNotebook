@@ -1,6 +1,7 @@
 from sklearn.pipeline import Pipeline
 from sklearn import preprocessing
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import impute
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 import numpy as np
@@ -13,7 +14,7 @@ def featureImportance(data):
 
 def build_forest(data):    
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True); 
-    forest = Pipeline([('Imputer', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
+    forest = Pipeline([('Imputer', impute.SimpleImputer()),
                        ('classifiers', RandomForestClassifier(n_estimators=100, random_state=0))])
     forest.fit(X,y)
     

@@ -73,8 +73,8 @@ def plot_baseline(data, scores):
     plt.yticks(np.arange(0, 1.1, step=0.2))
     plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
 
-    ax.set_ylim(ymin=0)
-    ax.set_ylim(ymax=1)
+    ax.set_ylim(bottom=0)
+    ax.set_ylim(top=1)
     ax.set_xlabel('Baseline Strategy')
     ax.set_ylabel('Accuracy')
     ax.set_title('Baseline Performance Predicting Feature: ' + data.default_target_attribute)
