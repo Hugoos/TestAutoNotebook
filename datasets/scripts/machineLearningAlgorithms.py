@@ -27,6 +27,10 @@ from xml.parsers.expat import ExpatError
 import matplotlib.pyplot as plt
 import numpy as np
 
+import pandas as pd
+
+from itertools import combinations
+
 CLASSIFICATION = "Supervised Classification"
 REGRESSION = "Supervised Regression"
 CLUSTERING = "Clustering"
@@ -66,6 +70,29 @@ def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRunt
         if runTPOT:
             strats = TPOTAutoMLRegressor(data, comp, strats, task, showRuntimePrediction)
     return strats
+
+def algorithmText(strats, maxBaseline):
+    text = ""
+    badPerformance = False
+    badPerformingAlgorithms = []
+
+    #Text about algorithms worse than baseline
+    for key in strats.keys():
+        if strats[key] < maxBaseline:
+            badPerformance = True
+            badPerformingAlgorithms.append(key)
+    if badPerformance:
+        if len(badPerformingAlgorithms) < 2:
+            text += "One of the algorithms: " + str(badPerformingAlgorithms)[1:-1] + " performed worse than the baseline.\n"
+        else:
+            text += "Several of the algorithms: " + str(badPerformingAlgorithms)[1:-1] + " performed worse than the baseline.\n"
+    else:
+        text += "All algorithms performed better than the baseline.\n"
+
+    #Text about algorithm performance
+    for key in strats.keys():
+        text += str(key) + " has an accuracy of " + str(strats[key]) + ".\n"    
+    print(text)
 
 def isTooLong(runtime, comp):
     return (runtime > comp)
@@ -157,6 +184,24 @@ def plotScatterSimple(x,y,xlabel,ylabel,title):
     plt.show()
 
 #Classification
+
+def outlierDetection(X, features): 
+    clf = pipeline.Pipeline(
+            steps=[
+                ('imputer', impute.SimpleImputer()),
+                ('estimator', ensemble.IsolationForest())
+            ]
+        )
+    outliers = clf.fit_predict(X)
+    df = pd.DataFrame(X, columns=features)
+    plotCombinations = combinations(df.keys(), 2)
+    df['outlier'] = outliers    
+    for a,b in plotCombinations:
+        fig, ax = plt.subplots() #required due to bug in pandas see https://github.com/jupyter/notebook/issues/2353
+        df.plot.scatter(x=a,y=b,c='outlier',colormap='bwr_r', ax=ax)
+        #plt.tight_layout()
+    
+    
 
 def runMLAlgorithm(estimator, name, strats, task, showRuntimePrediction, RTPName, timeLimit, tooLong):
     acc = 0
@@ -310,11 +355,26 @@ def testFunction(data):
 
     run = oml.runs.get_run(1836360)
     print(run.flow_id)
-    flow = oml.flows.get_flow(4834, reinstantiate=True)
-    run = runs.run_flow_on_task(55, flow, avoid_duplicate_runs = True)
+    #flow = oml.flows.get_flow(4834)
+    flow = oml.flows.get_flow(8900)
+    #flow = oml.flows.get_flow(8426)
+    #flow = oml.flows.get_flow(7650)
+    flow = oml.flows.flow_to_sklearn(flow)
+    clf = pipeline.Pipeline(
+            steps=[
+                ('imputer', impute.SimpleImputer()),
+                ('estimator', flow)
+            ]
+        )
+    flow = flows.sklearn_to_flow(clf)
+    print(flow.model)
+    taskId = tasks.get_task(55)
+
+    
+    run = runs.run_flow_on_task(taskId, flow, avoid_duplicate_runs = True)
 
     feval = dict(run.fold_evaluations['predictive_accuracy'][0])
-
+    acc = 0
     for val in feval.values():
         acc += val
     print(acc / 10)

@@ -1087,9 +1087,11 @@ else:
 
 def code_library(dataset):
     return """\
+%matplotlib inline
 from scripts.preamble import *
 did = """ + str(dataset) + """
 data = oml.datasets.get_dataset(did)
+show1DHist(data)
 task, topList, strats = printTopNFlows(did, data.default_target_attribute, 10) 
 topList """
 

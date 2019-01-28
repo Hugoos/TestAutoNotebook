@@ -66,9 +66,11 @@ def getTopNFlows(task):
             scores.append({"flow": run.flow_name,
                            "score": run.evaluations['area_under_roc_curve']})
         except KeyError:
-            print("Flow does not have AUC evaluation.")
+            pass
+            #print("Flow does not have AUC evaluation.")
         except ExpatError:
-            print("ExpatError, skipped run")
+            pass
+            #print("ExpatError, skipped run")
     scores.sort(key=operator.itemgetter('score'), reverse=True)
     try:
         strats[scores[0]["flow"]] = scores[0]["score"]
@@ -86,3 +88,10 @@ def printTopNFlows(did, defaultTF, N):
     else:
         return topTask, "This dataset has no runs yet", {}
 #pd.DataFrame.from_dict(tlist, orient='index')[['name','task_type','estimation_procedure']][:5]
+
+def show1DHist(data):
+    X, features = data.get_data(return_attribute_names=True)
+    df = pd.DataFrame(X, columns=features)
+    df.hist(bins=15, color='steelblue', edgecolor='black', linewidth=1.0,
+            xlabelsize=8, ylabelsize=8, grid=False, figsize=(16,9))
+    plt.tight_layout()
