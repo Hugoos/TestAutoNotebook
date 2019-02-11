@@ -1,9 +1,11 @@
-import openml as oml
 import ast
-from scripts.datasetSimilarity import *
-import numpy as np
 import operator
+
+import numpy as np
+import openml as oml
 import pandas as pd
+from scripts.datasetSimilarity import *
+
 
 def initializeDatasets(name, initContents):
     f = open('../local_data/' + name + '.txt','a+')

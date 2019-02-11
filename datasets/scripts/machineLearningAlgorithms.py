@@ -1,84 +1,96 @@
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
-from sklearn import svm
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn import tree
-from sklearn.model_selection import KFold
-from sklearn.naive_bayes import MultinomialNB
-from sklearn import impute
-from sklearn import *
-
-from tpot import TPOTClassifier
-from tpot import TPOTRegressor
-
 from textwrap import wrap
+from xml.parsers.expat import ExpatError
 
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 import openml as oml
 from openml import tasks, flows, runs
 from openml.exceptions import PyOpenMLError
-
-from xml.parsers.expat import ExpatError
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-import pandas as pd
-
-from itertools import combinations
+from sklearn import *
+from sklearn import impute
+from sklearn import svm
+from sklearn import tree
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.ensemble import IsolationForest
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
+from tpot import TPOTClassifier
+from tpot import TPOTRegressor
+from sklearn.utils.multiclass import unique_labels
 
 CLASSIFICATION = "Supervised Classification"
 REGRESSION = "Supervised Regression"
 CLUSTERING = "Clustering"
 
+class Settings:
+    def __init__(self, strats, task, removeOutliers, showRuntimePrediction, timeLimit):
+        self.strats = strats
+        self.task = task
+        self.removeOutliers = removeOutliers
+        self.showRuntimePrediction = showRuntimePrediction
+        self.timeLimit = timeLimit
+        self.taskId = retrieveTaskId(task)
+
+    def addAlgorithm(self, name, value):
+        self.strats[name] = value
+
+def getTaskId(task):
+    return task[next(iter(task))]['task_id']
+
+def retrieveTaskId(task):
+    return tasks.get_task(getTaskId(task))
+
 #High level functions
 
-def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction = False, runTPOT = False, timeLimit = 300000):
+def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction = False, runTPOT = False, timeLimit = 300000, removeOutliers = False):
+    settings = Settings(strats, task, removeOutliers, showRuntimePrediction, timeLimit)
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
     p = len(features)
     n = len(X)
     #unitValueMs = 0.01135917705 
     if problemType == CLASSIFICATION:
-        strats = runMLAlgorithm(tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "decision tree", strats, task, showRuntimePrediction, "J48", timeLimit, isTooLong(n**2 * p, comp))
-        strats = runMLAlgorithm(MultinomialNB(alpha=1.0),
-                                "naive bayes", strats, task, showRuntimePrediction, "NaiveBayes", timeLimit, isTooLong(n * p, comp))
-        strats = runMLAlgorithm(RandomForestClassifier(n_estimators=10, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "random forest", strats, task, showRuntimePrediction, "RandomForest", timeLimit, isTooLong(n**2 * p * 10, comp))
-        strats = runMLAlgorithm(svm.SVC(C =1.0, kernel="rbf", gamma="auto"),
-                                "support vector machine", strats, task, showRuntimePrediction, "SVM", timeLimit, isTooLong(n**2 * p + n**3, comp))
-        strats = runMLAlgorithm(KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
-                                "k-nearest neighbours", strats, task, showRuntimePrediction, "IBk", timeLimit, isTooLong(n**2 * p * 10, comp)) #multiplying by 10 gives more accurate predictions
+        runMLAlgorithm(tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "decision tree", "J48", isTooLong(n**2 * p, comp), settings)
+        runMLAlgorithm(MultinomialNB(alpha=1.0),
+                                "naive bayes", "NaiveBayes", isTooLong(n * p, comp), settings)
+        runMLAlgorithm(RandomForestClassifier(n_estimators=10, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "random forest", "RandomForest", isTooLong(n**2 * p * 10, comp), settings)
+        runMLAlgorithm(svm.SVC(C =1.0, kernel="rbf", gamma="auto"),
+                                "support vector machine", "SVM", isTooLong(n**2 * p + n**3, comp), settings)
+        runMLAlgorithm(KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
+                                "k-nearest neighbours", "IBk", isTooLong(n**2 * p * 10, comp), settings) #multiplying by 10 gives more accurate predictions
         if runTPOT:
-            strats = TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction)
+            TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction, settings)
 
     if problemType == REGRESSION:
-        strats = runMLAlgorithm(tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "decision tree", strats, task, showRuntimePrediction, "REPTree", timeLimit, isTooLong(n**2 * p, comp))
-        strats = runMLAlgorithm(LinearRegression(),
-                                "linear regression", strats, task, showRuntimePrediction, "LinearRegression", timeLimit, isTooLong(p**2 * n + p**3, comp))
-        strats = runMLAlgorithm(RandomForestRegressor(n_estimators=10, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "random forest", strats, task, showRuntimePrediction, "RandomForest", timeLimit, isTooLong(n**2 * p * 10, comp))
-        strats = runMLAlgorithm(svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto"),
-                                "support vector machine", strats, task, showRuntimePrediction, "SMOreg", timeLimit, isTooLong(n**2 * p + n**3, comp))
-        strats = runMLAlgorithm(KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
-                                "k-nearest neighbours", strats, task, showRuntimePrediction, "IBk", timeLimit, isTooLong(n**2 * p * 10, comp)) # multiplying by 10 gives more accurate predictions
+        runMLAlgorithm(tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "decision tree", "REPTree", isTooLong(n**2 * p, comp), settings)
+        runMLAlgorithm(LinearRegression(),
+                                "linear regression", "LinearRegression", isTooLong(p**2 * n + p**3, comp), settings)
+        runMLAlgorithm(RandomForestRegressor(n_estimators=10, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
+                                "random forest", "RandomForest", isTooLong(n**2 * p * 10, comp), settings)
+        runMLAlgorithm(svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto"),
+                                "support vector machine", "SMOreg", isTooLong(n**2 * p + n**3, comp), settings)
+        runMLAlgorithm(KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
+                                "k-nearest neighbours", "IBk", isTooLong(n**2 * p * 10, comp), settings) # multiplying by 10 gives more accurate predictions
         if runTPOT:
-            strats = TPOTAutoMLRegressor(data, comp, strats, task, showRuntimePrediction)
-    return strats
+            TPOTAutoMLRegressor(data, comp, settings)
+    return settings.strats
 
-def algorithmText(strats, maxBaseline):
+def algorithmText(settings, maxBaseline):
     text = ""
     badPerformance = False
     badPerformingAlgorithms = []
 
     #Text about algorithms worse than baseline
-    for key in strats.keys():
-        if strats[key] < maxBaseline:
+    for key in settings.strats.keys():
+        if settings.strats[key] < maxBaseline:
             badPerformance = True
             badPerformingAlgorithms.append(key)
     if badPerformance:
@@ -143,8 +155,8 @@ def plot_reg_alg(data, strats, maxBaseline):
 
 def plot_class_alg(data, strats, maxBaseline):
     n_groups = len(strats)
-
-    fig, ax = plt.subplots()
+    matplotlib.rc('xtick', labelsize=14)
+    fig, ax = plt.subplots(figsize=(16,9))
 
     index = np.arange(n_groups)
     bar_width = 0.1
@@ -152,12 +164,38 @@ def plot_class_alg(data, strats, maxBaseline):
     opacity = 0.4
     error_config = {'ecolor': '0.3'}
 
-    barlist =plt.bar(range(len(strats)), strats.values(), align='center')
-    stratsList = list(strats.keys())
-    plt.xticks(range(len(strats)), [ '\n'.join(wrap(l, 20)) for l in stratsList])
-    plt.yticks(np.arange(0, 1.1, step=0.2))
-    plt.yticks(list(plt.yticks()[0]) + [maxBaseline])
+    keyList, valueList = zip(*sorted(zip(strats.keys(), strats.values())))
+    colorList = []
 
+    prevKey = ""
+    prevValue = -1
+    
+    for num, key in enumerate(keyList):       
+        value = valueList[num]
+
+        if value > maxBaseline:
+            colorList.append("g")
+        else:
+            colorList[num].append("r")
+            
+        if '_' in key:
+            name, outlier = key.split('_') 
+            if prevKey == name:
+                if value > prevValue:
+                    colorList.pop(num)
+                    colorList.append("m")
+                else:
+                    colorList.pop(num-1)
+                    colorList.insert(num-1, "m")
+        prevKey = key
+        prevValue = value
+    if "m" in colorList:
+        print("Magenta colour denotes best performing algorithm when this algorithm is trained on different version of the test set.")
+    barlist =plt.bar(range(len(strats)), valueList, align='center')
+    #stratsList = list(strats.keys())
+    plt.xticks(range(len(strats)), [ '\n'.join(wrap(l, 20)) for l in keyList])
+    plt.yticks(np.arange(0, 1.1, step=0.2))
+    plt.yticks(list(plt.yticks()[0]) + [maxBaseline])  
     ax.set_ylim(bottom=0)
     ax.set_ylim(top=1)
     ax.set_xlabel('Machine Learning Algorithm')
@@ -165,9 +203,9 @@ def plot_class_alg(data, strats, maxBaseline):
     ax.set_title('Algorithm Performance Predicting Feature: ' + data.default_target_attribute)
     plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
     plt.gca().get_yticklabels()[6].set_color('red')
-    for bar in barlist:
+    for num, bar in enumerate(barlist):
         if bar.get_height() > maxBaseline:
-            bar.set_facecolor('g')
+            bar.set_facecolor(colorList[num])
     fig.autofmt_xdate()
     fig.tight_layout()
     plt.show()
@@ -185,57 +223,45 @@ def plotScatterSimple(x,y,xlabel,ylabel,title):
 
 #Classification
 
-def outlierDetection(X, features): 
-    clf = pipeline.Pipeline(
-            steps=[
-                ('imputer', impute.SimpleImputer()),
-                ('estimator', ensemble.IsolationForest())
-            ]
-        )
-    outliers = clf.fit_predict(X)
-    df = pd.DataFrame(X, columns=features)
-    plotCombinations = combinations(df.keys(), 2)
-    df['outlier'] = outliers    
-    for a,b in plotCombinations:
-        fig, ax = plt.subplots() #required due to bug in pandas see https://github.com/jupyter/notebook/issues/2353
-        df.plot.scatter(x=a,y=b,c='outlier',colormap='bwr_r', ax=ax)
-        #plt.tight_layout()
-    
-    
 
-def runMLAlgorithm(estimator, name, strats, task, showRuntimePrediction, RTPName, timeLimit, tooLong):
+def runMLAlgorithm(estimator, name, RTPName, tooLong, settings):
     acc = 0
     expectedRuntime = -1
-    if showRuntimePrediction:
-        expectedRuntime = getAverageRuntime(RTPName, task)
-    if (expectedRuntime <= timeLimit and expectedRuntime != -1) or (not tooLong and expectedRuntime  == -1):
-        taskId = tasks.get_task(getTaskId(task))
-        
-        clf = pipeline.Pipeline(
-            steps=[
-                ('imputer', impute.SimpleImputer()),
-                ('estimator', estimator)
-            ]
-        )
-        
+    if settings.showRuntimePrediction:
+        expectedRuntime = getAverageRuntime(RTPName, settings.task)
+    if (expectedRuntime <= settings.timeLimit and expectedRuntime != -1) or (not tooLong and expectedRuntime  == -1):
+        if settings.removeOutliers:
+            name += "_noOutlier"
+            clf = pipeline.Pipeline(
+                steps=[
+                    ('imputer', impute.SimpleImputer()),
+                    ('estimator', WithoutOutliersClassifier(IsolationForest(behaviour='new', contamination='auto'), estimator))
+                ]
+            )
+        else:
+            clf = pipeline.Pipeline(
+                steps=[
+                    ('imputer', impute.SimpleImputer()),
+                    ('estimator', estimator)
+                ]
+            )
         flow = flows.sklearn_to_flow(clf)
         try:
-            run = runs.run_flow_on_task(taskId, flow, avoid_duplicate_runs = True)
+            run = runs.run_flow_on_task(settings.taskId, flow, avoid_duplicate_runs = True)
         except PyOpenMLError:
             print("Run already exists in OpenML, WIP")
-            return strats
+            return
         feval = dict(run.fold_evaluations['predictive_accuracy'][0])
 
         for val in feval.values():
             acc += val
-        strats[name] = acc / 10
+        settings.addAlgorithm(name, acc / 10)
         run.publish()
         run.push_tag("auto-jupyter-notebook")
     else:
         print("Skipping run because of time limit set")
-    return strats
 
-def TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction):
+def TPOTAutoMLClassifier(data, settings):
     # Runs the AutoML algorithm on the dataset
     clf = TPOTClassifier()
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
@@ -271,9 +297,9 @@ def TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction):
     X_train, X_test, y_train, y_test = train_test_split(X, y)
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
-    strats['TPOTAutoML'] = acc 
+    settings.addAlgorithm('TPOTAutoML', acc)
 
-def TPOTAutoMLRegressor(data, comp, strats, task, showRuntimePrediction):
+def TPOTAutoMLRegressor(data, settings):
     # Runs the AutoML algorithm on the dataset
     clf = TPOTRegressor()
     X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True);
@@ -308,10 +334,9 @@ def TPOTAutoMLRegressor(data, comp, strats, task, showRuntimePrediction):
     X_train, X_test, y_train, y_test = train_test_split(X, y)
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
-    strats['TPOTAutoML'] = acc 
     #else:
     #    print("computation complexity too high, please run manually if desired.")
-    return strats
+    settings.addAlgorithm('TPOTAutoML', acc)
 
 # Runtime approximation
 
@@ -346,8 +371,6 @@ def getAverageRuntime(algName, task):
         return np.median(x)
     return -1
 
-def getTaskId(task):
-    return task[next(iter(task))]['task_id']
 
 def testFunction(data):
     #clf = sklearn.ensemble.forest.RandomForestClassifier(bootstrap:true,weight:null,criterion:"gini",depth:null,features:"auto",nodes:null,decrease:0.0,split:null,leaf:1,split:2,leaf:0.0,estimators:10,jobs:1,score:false,state:6826,verbose:0,start:false)
@@ -384,3 +407,18 @@ def testFunction(data):
     #clf.fit(X_train, y_train)
     #acc = clf.score(X_test, y_test)
     #print(acc)
+    
+class WithoutOutliersClassifier(BaseEstimator, ClassifierMixin):
+    def __init__(self, outlierCLF, classifier):
+        self.outlierCLF = outlierCLF
+        self.classifier = classifier
+
+    def fit(self, X, y):
+        self.outlierCLF_ = clone(self.outlierCLF)
+        mask = self.outlierCLF_.fit_predict(X,y) == 1
+        self.classifier_ = clone(self.classifier).fit(X[mask], y[mask])
+        self.classes_ = unique_labels(y)
+        return self
+
+    def predict(self, X):
+        return self.classifier_.predict(X)

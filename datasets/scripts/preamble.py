@@ -57,7 +57,7 @@ def getTopTask(tasks, defaultTF):
     else:
         return -1
     
-def getTopNFlows(task):
+def getFlows(task):
     scores = []
     strats = {}
     for id, _ in task.items():
@@ -79,19 +79,26 @@ def getTopNFlows(task):
         print("No compatible runs found")
     return scores, strats
 
-def printTopNFlows(did, defaultTF, N):
+def getOpenMLData(did, defaultTF):
     tasks = getDatasetTasks(did)
     topTask = getTopTask(tasks, defaultTF)
     if topTask != -1:
-        scores, strats = getTopNFlows(topTask)
-        return topTask, pd.DataFrame.from_dict(scores)[:N], strats
+        scores, strats = getFlows(topTask)
+        return topTask, pd.DataFrame.from_dict(scores), strats, scores
     else:
-        return topTask, "This dataset has no runs yet", {}
+        return topTask, "This dataset has no runs yet", {}, {}
 #pd.DataFrame.from_dict(tlist, orient='index')[['name','task_type','estimation_procedure']][:5]
 
-def show1DHist(data):
-    X, features = data.get_data(return_attribute_names=True)
-    df = pd.DataFrame(X, columns=features)
-    df.hist(bins=15, color='steelblue', edgecolor='black', linewidth=1.0,
-            xlabelsize=8, ylabelsize=8, grid=False, figsize=(16,9))
-    plt.tight_layout()
+def getData(data):
+    X = []
+    y = []
+    features = []
+    try:
+        X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True)
+    except NotImplementedError as e:
+        if "Number of requested targets" in str(e):
+            print("Auto Jupyter Notebook does not currently support more than one dataset target.")
+        else:
+            print("Unknown NotImplementedError")
+
+    return X, y, features

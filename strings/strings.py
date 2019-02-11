@@ -1091,9 +1091,9 @@ def code_library(dataset):
 from scripts.preamble import *
 did = """ + str(dataset) + """
 data = oml.datasets.get_dataset(did)
-show1DHist(data)
-task, topList, strats = printTopNFlows(did, data.default_target_attribute, 10) 
-topList """
+X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True)
+task, topList, strats, scores = getOpenMLData(did, data.default_target_attribute) 
+topList[:10] """
 
 run_similarity = """\
 from scripts.localDataOpenMLInterface import *
@@ -1110,9 +1110,27 @@ maxBaseline = generateBaselines(data, problemType) """
 
 run_algorithms = """\
 from scripts.machineLearningAlgorithms import *
-strats = runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction=True, runTPOT=False)
+strats = runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction=False, runTPOT=False, removeOutliers=removeOutliers)
 plot_alg(data, strats, maxBaseline, problemType) """
 
 run_featureImportance = """\
 from scripts.featureImportance import *
 featureImportance(data) """
+
+run_dataVisualization = """\
+from scripts.dataVisualization import *
+show1DHist(data) """
+
+run_outlierDetection = """\
+from scripts.outlierDetection import *
+outlierDetection(X, features, 10) """
+
+run_removeOutliers = """\
+removeOutliers = False """
+
+text_removeOutliers = """\
+Please run the full notebook then toggle removeOutliers and run this cell and the next to compare the algorithms with and without outliers. """
+
+run_relativePerformance = """\
+from scripts.relativePerformance import * 
+showRelativePerformanceBoxplot(scores, topList, strats, maxBaseline) """
