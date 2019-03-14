@@ -1091,7 +1091,7 @@ def code_library(dataset):
 from scripts.preamble import *
 did = """ + str(dataset) + """
 data = oml.datasets.get_dataset(did)
-X, y, features = data.get_data(target=data.default_target_attribute, return_attribute_names=True)
+X, y, features = getData(data)
 task, topList, strats, scores = getOpenMLData(did, data.default_target_attribute) 
 topList[:10] """
 
@@ -1110,8 +1110,8 @@ maxBaseline = generateBaselines(data, problemType) """
 
 run_algorithms = """\
 from scripts.machineLearningAlgorithms import *
-strats = runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction=False, runTPOT=False, removeOutliers=removeOutliers)
-plot_alg(data, strats, maxBaseline, problemType) """
+settings = runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction=False, runTPOT=False, removeOutliers=removeOutliers)
+plot_alg(data, settings.strats, maxBaseline, problemType) """
 
 run_featureImportance = """\
 from scripts.featureImportance import *
@@ -1131,6 +1131,17 @@ removeOutliers = False """
 text_removeOutliers = """\
 Please run the full notebook then toggle removeOutliers and run this cell and the next to compare the algorithms with and without outliers. """
 
+run_customAlgorithm = """\
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+
+#Create a custom algorithm by setting classifier and name
+#---------------------------------------------------
+clf =  QuadraticDiscriminantAnalysis()
+name = "CustomAlgorithmQuadraticDiscriminantAnalysis"
+#---------------------------------------------------
+runMLAlgorithm(estimator=clf, name=name, settings=settings)
+plot_alg(data, settings.strats, maxBaseline, problemType) """
+
 run_relativePerformance = """\
 from scripts.relativePerformance import * 
-showRelativePerformanceBoxplot(scores, topList, strats, maxBaseline) """
+showRelativePerformanceBoxplot(scores, topList, settings.strats, maxBaseline) """

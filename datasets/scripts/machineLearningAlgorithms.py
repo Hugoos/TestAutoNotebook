@@ -56,32 +56,32 @@ def runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRunt
     #unitValueMs = 0.01135917705 
     if problemType == CLASSIFICATION:
         runMLAlgorithm(tree.DecisionTreeClassifier(criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "decision tree", "J48", isTooLong(n**2 * p, comp), settings)
+                                "decision tree", settings, "J48", isTooLong(n**2 * p, comp))
         runMLAlgorithm(MultinomialNB(alpha=1.0),
-                                "naive bayes", "NaiveBayes", isTooLong(n * p, comp), settings)
+                                "naive bayes", settings, "NaiveBayes", isTooLong(n * p, comp))
         runMLAlgorithm(RandomForestClassifier(n_estimators=10, criterion="gini", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "random forest", "RandomForest", isTooLong(n**2 * p * 10, comp), settings)
+                                "random forest", settings, "RandomForest", isTooLong(n**2 * p * 10, comp))
         runMLAlgorithm(svm.SVC(C =1.0, kernel="rbf", gamma="auto"),
-                                "support vector machine", "SVM", isTooLong(n**2 * p + n**3, comp), settings)
+                                "support vector machine", settings, "SVM", isTooLong(n**2 * p + n**3, comp))
         runMLAlgorithm(KNeighborsClassifier(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
-                                "k-nearest neighbours", "IBk", isTooLong(n**2 * p * 10, comp), settings) #multiplying by 10 gives more accurate predictions
+                                "k-nearest neighbours", settings , "IBk", isTooLong(n**2 * p * 10, comp)) #multiplying by 10 gives more accurate predictions
         if runTPOT:
             TPOTAutoMLClassifier(data, comp, strats, task, showRuntimePrediction, settings)
 
     if problemType == REGRESSION:
         runMLAlgorithm(tree.DecisionTreeRegressor(criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "decision tree", "REPTree", isTooLong(n**2 * p, comp), settings)
+                                "decision tree", settings, "REPTree", isTooLong(n**2 * p, comp))
         runMLAlgorithm(LinearRegression(),
-                                "linear regression", "LinearRegression", isTooLong(p**2 * n + p**3, comp), settings)
+                                "linear regression", settings, "LinearRegression", isTooLong(p**2 * n + p**3, comp))
         runMLAlgorithm(RandomForestRegressor(n_estimators=10, criterion="mse", max_depth=None, min_samples_leaf=1, max_features=None, max_leaf_nodes=None),
-                                "random forest", "RandomForest", isTooLong(n**2 * p * 10, comp), settings)
+                                "random forest", settings, "RandomForest", isTooLong(n**2 * p * 10, comp))
         runMLAlgorithm(svm.SVR(C=1.0, epsilon=0.1, kernel="rbf", gamma="auto"),
-                                "support vector machine", "SMOreg", isTooLong(n**2 * p + n**3, comp), settings)
+                                "support vector machine", settings, "SMOreg", isTooLong(n**2 * p + n**3, comp))
         runMLAlgorithm(KNeighborsRegressor(n_neighbors = 5, weights = "uniform", algorithm = "auto"),
-                                "k-nearest neighbours", "IBk", isTooLong(n**2 * p * 10, comp), settings) # multiplying by 10 gives more accurate predictions
+                                "k-nearest neighbours", settings, "IBk", isTooLong(n**2 * p * 10, comp)) # multiplying by 10 gives more accurate predictions
         if runTPOT:
             TPOTAutoMLRegressor(data, comp, settings)
-    return settings.strats
+    return settings
 
 def algorithmText(settings, maxBaseline):
     text = ""
@@ -164,7 +164,11 @@ def plot_class_alg(data, strats, maxBaseline):
     opacity = 0.4
     error_config = {'ecolor': '0.3'}
 
-    keyList, valueList = zip(*sorted(zip(strats.keys(), strats.values())))
+    try:
+        keyList, valueList = zip(*sorted(zip(strats.keys(), strats.values())))
+    except:
+        print("cannot plot the algorithms")
+        return
     colorList = []
 
     prevKey = ""
@@ -179,8 +183,10 @@ def plot_class_alg(data, strats, maxBaseline):
             colorList[num].append("r")
             
         if '_' in key:
-            name, outlier = key.split('_') 
-            if prevKey == name:
+            *name, outlier = key.split('_')
+            if len(name) > 1:
+                name = "_".join(name)
+            if prevKey == name[0]:
                 if value > prevValue:
                     colorList.pop(num)
                     colorList.append("m")
@@ -224,10 +230,10 @@ def plotScatterSimple(x,y,xlabel,ylabel,title):
 #Classification
 
 
-def runMLAlgorithm(estimator, name, RTPName, tooLong, settings):
+def runMLAlgorithm(estimator, name, settings, RTPName = None, tooLong = False):
     acc = 0
     expectedRuntime = -1
-    if settings.showRuntimePrediction:
+    if settings.showRuntimePrediction and RTPName is not None:
         expectedRuntime = getAverageRuntime(RTPName, settings.task)
     if (expectedRuntime <= settings.timeLimit and expectedRuntime != -1) or (not tooLong and expectedRuntime  == -1):
         if settings.removeOutliers:
@@ -250,6 +256,9 @@ def runMLAlgorithm(estimator, name, RTPName, tooLong, settings):
             run = runs.run_flow_on_task(settings.taskId, flow, avoid_duplicate_runs = True)
         except PyOpenMLError:
             print("Run already exists in OpenML, WIP")
+            return
+        except:
+            print("An unexpected error occured")
             return
         feval = dict(run.fold_evaluations['predictive_accuracy'][0])
 

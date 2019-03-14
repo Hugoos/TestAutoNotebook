@@ -8,8 +8,11 @@ def showRelativePerformanceBoxplot(scores, topList, strats, maxBaseline):
 
     for score in scores:
         scoreslist.append(score['score'])
-        
-    topList.plot(kind="box", grid=False, figsize=(16,9), rot=45)
+    try:
+        topList.plot(kind="box", grid=False, figsize=(16,9), rot=45)
+    except:
+        "Cannot plot the boxplots"
+        return
     y = scoreslist
     x = np.random.normal(1, 0.03, size=len(y))
     plt.plot(x, y, 'b.', alpha=0.2)

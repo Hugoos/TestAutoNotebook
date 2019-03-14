@@ -18,12 +18,13 @@ def initializeDatasets(name, initContents):
 
 def writeDatasets(name, contents):
     f = open('../local_data/' + name + '.txt','w')
+    print("creating new " + name + " file")
     f.write(str(contents))
     f.close()
 
 def findFeatureRanges():
-    initializeDatasets("metaFeaturesByType", "{}")
-    initializeDatasets("metaFeaturesMetadata", "{}")
+    writeDatasets("metaFeaturesByType", "{}")
+    writeDatasets("metaFeaturesMetadata", "{}")
     features = {}
     featuresMetaData = {}
     f = open('../local_data/datasetMetaFeatures.txt','a+')
@@ -51,7 +52,7 @@ def findFeatureRanges():
 
 def normalizeMetaFeatures():
     normalizedMetaFeatures = {}
-    initializeDatasets("datasetMetaFeaturesNormalized", "{}")
+    writeDatasets("datasetMetaFeaturesNormalized", "{}")
     f = open('../local_data/datasetMetaFeatures.txt','r')
     metaFeatures = eval(f.readline())
     f2 = open('../local_data/metaFeaturesMetadata.txt','r')
@@ -65,7 +66,7 @@ def normalizeMetaFeatures():
     writeDatasets("datasetMetaFeaturesNormalized", normalizedMetaFeatures)
 
 def createUpdatedSimilarityMatrix(name, features, defaultValue = 0):
-    updatedSimilarityMatrixf = initializeDatasets(name, "{}")
+    updatedSimilarityMatrixf = writeDatasets(name, "{}")
     updatedSimilarityMatrix = eval(updatedSimilarityMatrixf.readline())
     f = open('../local_data/' + features + '.txt','r')
     metaFeatures = eval(f.readline())
@@ -112,11 +113,11 @@ def make_clickable(val):
 
 
     
-def updateLocalDatasets(datasets):
+def updateLocalDatasets():
     newDatasetsList = []
-    indexf = initializeDatasets("datasetIndex", "[]")
-    metaFeaturef = initializeDatasets("datasetMetaFeatures", "{}")
-    similarityMatrixf = initializeDatasets("datasetSimilarityMatrix", "{}")
+    indexf = writeDatasets("datasetIndex", "[]")
+    metaFeaturef = writeDatasets("datasetMetaFeatures", "{}")
+    similarityMatrixf = writeDatasets("datasetSimilarityMatrix", "{}")
     
     index = ast.literal_eval(indexf.readline())
     metaFeatures = ast.literal_eval(metaFeaturef.readline())
@@ -142,9 +143,16 @@ def updateLocalDatasets(datasets):
                 else:
                     similarityMatrix[did][did] = -1
             index.append(did)
-            writeDatasets("datasetMetaFeatures", metaFeatures)
-            writeDatasets("datasetSimilarityMatrix", similarityMatrix)
-            writeDatasets("datasetIndex", index)
         except:
             print("Dataset " + str(did) + " failed to be processed correctly")
+    writeDatasets("datasetMetaFeatures", metaFeatures)
+    writeDatasets("datasetSimilarityMatrix", similarityMatrix)
+    writeDatasets("datasetIndex", index)
+
+def generateLocalData():
+    updateLocalDatasets() #Create datasetIndex, datasetMetaFeatures, datasetSimilarityMatrix
+    findFeatureRanges() #Create metaFeaturesByType metaFeaturesMetadata
+    normalizeMetaFeatures() #Create datasetMetaFeaturesNormalized
+    createUpdatedSimilarityMatrix("datasetSimilarityMatrixNormalized", "datasetMetaFeaturesNormalized", defaultValue = 0) #Create datasetSimilarityMatrixNormalized datasetMetaFeaturesNormalized
+    
     

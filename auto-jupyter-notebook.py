@@ -81,6 +81,7 @@ def generate_jnb(dataset, complexity):
     nb['cells'].append(nbf.v4.new_code_cell(run_baselines))
     create_block(text_removeOutliers, run_removeOutliers)
     nb['cells'].append(nbf.v4.new_code_cell(run_algorithms))
+    nb['cells'].append(nbf.v4.new_code_cell(run_customAlgorithm))
     nb['cells'].append(nbf.v4.new_code_cell(run_relativePerformance))
     
     #create_block(text_landmarkers,code_get_landmarkers)
