@@ -1143,5 +1143,6 @@ runMLAlgorithm(estimator=clf, name=name, settings=settings)
 plot_alg(data, settings.strats, maxBaseline, problemType) """
 
 run_relativePerformance = """\
+%matplotlib nbagg
 from scripts.relativePerformance import * 
 showRelativePerformanceBoxplot(scores, topList, settings.strats, maxBaseline) """

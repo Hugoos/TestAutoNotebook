@@ -374,8 +374,8 @@ def getAverageRuntime(algName, task):
     if count != 0:
         x = np.array(x)
         y = np.array(y)
-        print("Median execution time in ms: " + str(np.median(x)))
-        print("Mean execution time in ms: " + str(totalRunTime / count))
+        print(algName + " Median execution time in ms: " + str(np.median(x)))
+        print(algName + " Mean execution time in ms: " + str(totalRunTime / count))
         plotScatterSimple(x,y,'usercpu_time_millis','accuracy','Execution times for ' + algName)
         return np.median(x)
     return -1

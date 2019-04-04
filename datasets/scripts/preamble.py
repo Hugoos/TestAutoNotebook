@@ -11,6 +11,8 @@ from matplotlib import cm
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.ticker import MaxNLocator
 
+from IPython.display import display, HTML
+
 from sklearn import dummy
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
@@ -33,6 +35,22 @@ from xml.parsers.expat import ExpatError
 plt.rcParams['figure.dpi']= 120
 plt.rcParams['xtick.labelsize'] = 8
 plt.rcParams['ytick.labelsize'] = 8
+
+def removeWarnings():
+    return HTML('''<script>
+         code_show_err=true; 
+         function code_toggle_err() {
+         if (code_show_err){
+          $('div.output_stderr').hide();
+         } else {
+          $('div.output_stderr').show();
+         }
+         code_show_err = !code_show_err
+        } 
+        $( document ).ready(code_toggle_err);
+        </script>
+        To toggle on/off output_stderr, click <a href="javascript:code_toggle_err()">here</a>. Toggling this will remove error messages.''')
+
 
 def getDatasetTasks(did):
     tlist = oml.tasks.list_tasks()
