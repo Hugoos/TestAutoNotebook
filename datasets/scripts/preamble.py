@@ -32,6 +32,9 @@ from collections import namedtuple
 
 from xml.parsers.expat import ExpatError
 
+import warnings
+warnings.filterwarnings('ignore')
+
 plt.rcParams['figure.dpi']= 120
 plt.rcParams['xtick.labelsize'] = 8
 plt.rcParams['ytick.labelsize'] = 8

@@ -1,12 +1,11 @@
 # Automatic Jupyter Notebook
 
-WORK IN PROGRESS --THIS README IS OUTDATED, WILL BE UPDATED AT A LATER DATE--
-Test version
+--THIS PROJECT HAS COME TO AN END, NO FURTHER UPDATES WILL COME ON THIS GITHUB PAGE--
 
 This is a project about automatic generating Jupyter Notebook for OpenML dataset.
 The program will pull an OpenML dataset from their servers using the datasetID.
 The program will attempt to classify what kind of machine learning problem can be solved based on the target feature.
-Currently both classification problems and regression problems are supported additionally clustering problems are recognized but not officially supported as of yet.
+Currently only classification problems are supported, it will recognize regression problems but they currently don't work, additionally clustering problems are recognized but not officially supported as of yet.
 Some information about the algorithms is displayed and hyperparameters can be adjusted within the notebook.
 
 ## Generating Jupyter notebook

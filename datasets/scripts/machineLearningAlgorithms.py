@@ -212,9 +212,16 @@ def plot_class_alg(data, strats, maxBaseline):
     for num, bar in enumerate(barlist):
         if bar.get_height() > maxBaseline:
             bar.set_facecolor(colorList[num])
+    
+    for i, v in enumerate(keyList):
+        value = valueList[i]
+        ax.text(i - .05, 
+                0.02, 
+                "{0:.2f}".format(value),)
     fig.autofmt_xdate()
     fig.tight_layout()
     plt.show()
+    
 
 def plotScatterSimple(x,y,xlabel,ylabel,title):
 

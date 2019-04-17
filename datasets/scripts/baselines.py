@@ -78,8 +78,15 @@ def plot_baseline(data, scores):
     ax.set_xlabel('Baseline Strategy')
     ax.set_ylabel('Accuracy')
     ax.set_title('Baseline Performance Predicting Feature: ' + data.default_target_attribute)
+    labels = list(strats.values())
+    
+    for i, v in enumerate(labels):
+        ax.text(i-.13, 
+                  1 - v/labels[i] + 0.02, 
+                  "{0:.2f}".format(labels[i]))
+
     plt.axhline(y=maxBaseline, color='r', linestyle='--', label=maxBaseline)
     plt.gca().get_yticklabels()[6].set_color('red')
     fig.tight_layout()
-    plt.show() 
+    plt.show()
     return maxBaseline 

@@ -1095,35 +1095,67 @@ X, y, features = getData(data)
 task, topList, strats, scores = getOpenMLData(did, data.default_target_attribute) 
 topList[:10] """
 
+text_warning = """\
+To properly show several of the elements of this notebook please run this entire notebook again."""
+
+text_library = """\
+These are the top 10 flows for this dataset available on OpenML."""
+
 run_similarity = """\
 from scripts.localDataOpenMLInterface import *
 showTopNSimilarDatasets("datasetSimilarityMatrixNormalized", did, 10) """
+
+text_similarity = """\
+These are the top 10 similar datasets based on the cosine similarity between their standardized property vectors."""
 
 run_problemType = """\
 from scripts.problemType import *
 problemType = findProblemType(data) 
 checkTask(task, problemType, data.default_target_attribute) """
 
+text_problemType = """\
+Here we determine the problem type and verify whether or not we have automatically selected the correct main task."""
+
 run_baselines = """\
+%matplotlib inline
 from scripts.baselines import *
 maxBaseline = generateBaselines(data, problemType) """
 
+text_baselines = """\
+This plot shows the baseline performance on this dataset, from this point onwards the red dotted line will denote the maximum baseline threshold."""
+
 run_algorithms = """\
+%matplotlib inline
 from scripts.machineLearningAlgorithms import *
 settings = runMachineLearningAlgorithms(data, comp, strats, problemType, task, showRuntimePrediction=False, runTPOT=False, removeOutliers=removeOutliers)
 plot_alg(data, settings.strats, maxBaseline, problemType) """
 
+text_algorithms = """\
+This plot shows algorithm performance for every algorithm that is run in this notebook. A red bar denotes that the algorithm performs worse than the baseline. A green bar denotes that the algorithm performs better than the baseline and a purple bar is only shown when removing outliers and denotes whether the original or algorithm with outliers removed is better."""
+
 run_featureImportance = """\
+%matplotlib inline
 from scripts.featureImportance import *
 featureImportance(data) """
 
+text_featureImportance = """\
+This plot shows the feature importance of each of the features."""
+
 run_dataVisualization = """\
+%matplotlib inline
 from scripts.dataVisualization import *
 show1DHist(data) """
 
+text_dataVisualization = """\
+These plots show histograms for each of the features of this dataset."""
+
 run_outlierDetection = """\
+%matplotlib inline
 from scripts.outlierDetection import *
 outlierDetection(X, features, 10) """
+
+text_outlierDetection = """\
+The first plot is a plot of normalized boxplots for each of the features and the second plot is a styled dataframe sorted by anomaly score, yellow denotes outlier values and a heatmap is included for the anomaly scores."""
 
 run_removeOutliers = """\
 removeOutliers = False """
@@ -1132,6 +1164,7 @@ text_removeOutliers = """\
 Please run the full notebook then toggle removeOutliers and run this cell and the next to compare the algorithms with and without outliers. """
 
 run_customAlgorithm = """\
+%matplotlib inline
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 #Create a custom algorithm by setting classifier and name
@@ -1142,7 +1175,13 @@ name = "CustomAlgorithmQuadraticDiscriminantAnalysis"
 runMLAlgorithm(estimator=clf, name=name, settings=settings)
 plot_alg(data, settings.strats, maxBaseline, problemType) """
 
+text_customAlgorithm = """\
+Please use this cell to easily add new classifiers, an example is already given."""
+
 run_relativePerformance = """\
 %matplotlib nbagg
 from scripts.relativePerformance import * 
 showRelativePerformanceBoxplot(scores, topList, settings.strats, maxBaseline) """
+
+text_relativePerformance = """\
+This is an interactive plot which shows all algorithm performance datapoints from OpenML, a boxplot is overlaid. The red dots are all the algorithms run in this notebook, you can mouse over each of the datapoints to see their name and accuracy."""
